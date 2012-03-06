@@ -1,0 +1,6 @@
+
+def create_new_partition_tables(start_key_values, end_key_values) should  be named "create_partition_tables"
+
+bulkmixin::update_many should handle updated_at
+
+in bulkmixin create_many: consider checking column_names for each row and raise exception if different than first row

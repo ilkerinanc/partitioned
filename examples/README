@@ -1,0 +1,23 @@
+The directory holds examples of how to use the partitioned gem.
+
+The lib directory contains:
+    by_company_id.rb  - a partitioned model where the partition's key is the column company_id that references companies.
+    company.rb        - an ActiveRecord model for the table companies.
+    roman.rb          - some helper routines for generating roman numerals.
+
+This directory holds executable rails scripts that create and populate partitioned tables.  The scripts accept the following
+parameters:
+  --force		delete used tables before starting
+  --cleanup		delete used tables and exit
+
+The scripts are:
+    company_id.rb			- table 'employees' partitioned by company_id
+    company_id_and_created_at.rb	- table 'employees' has multi-level partitioning by company_id then created_at
+    					  created_at is grouped by week where weeks start on Monday.
+    created_at.rb			- table 'employees' partitioned by created_at
+    					  created_at is grouped by week where weeks start on Monday.
+    created_at_referencing_awards.rb	- table 'employees' partitioned by created_at and table 'awards' is partitioned
+    					  by created_at which a reference to specific child table of employees with the
+					  created_at range.
+    id.rb				- partitioned on 'id' grouping each 10 records into separate child tables.
+    start_date.rb			- grouped by column start_date which is a date grouped by month.

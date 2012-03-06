@@ -1,0 +1,136 @@
+IN WORK:
+* (mark) tests need to be written
+
+* (keith) make sure session pools are managed correctly ala rails 2.3.5 version
+
+* (alex) use yard instead of rdoc
+wow, yard is much better
+
+* (aaron) With Postgres partitioning, what do you get and what don't you get to
+  percolate down into child tables (indices, key constraints, etc.)
+
+* (aaron) What sorts of things is it dangerous to do with this code?
+  (Thinking of Andrew's delete stmt)
+
+* (aaron) please create in-depth docs on how to create a class partition by X
+
+* (aaron) please create in-depth docs on how to create a new partitioned class
+
+* (andrew) will this work without a constraint column
+yes, but i would like to add a mixin that helps you build these non-partitioned tables
+with this plugin.
+
+IN CONSIDERATION:
+
+* (mark) will the code be backwards compatible with the original partitioning code in trackings/asotracking
+create_many and update_many have a different signature to all for a generic version.  it can though, but
+the new interface is much better.
+
+* (hofer) will the code be backwards compatible with rails 2.3.5
+i have not written the monkey patches for rails 2.3.5.  -- it can, though, if there is interest.
+
+* (alex) move to a gem.
+eeeash
+
+* (alex) a better name for SqlAdapter
+thinking about it
+
+* (alex) someone besides keith should understand the monkey patching.
+
+NO CHANGES:
+
+* (aaron) base.rb:line 185 -- what's a rule name?
+i think this is a database question, not a partitioning question. if you would like the function documented better
+(or even an explanation of rules) please tell me.
+
+* (aaron) base.rb:lines 191-203 -- what's the difference between these methods? The method comments are identical.
+the are delegates.  should they be documented in all places?  maybe they shouldn't exist?
+
+* (aaron) base.rb:line 205 -- what's this "forwardable" sprocket?
+delegate helper
+
+* (darrel) please rename Partitioned::Base to Partitioned::PartitionedBase
+although I feel your pain, i think this is a common naming convention and renaming the class
+to something that duplicates its module name is not really needed.  I am willing to reconsider
+this if the team believes we should stop naming things "Base" and if there is a general solution
+for what to name the base class.
+
+* (andrew) Partitioned::MethodNotImplemented should be ruby MethodNotImplemented
+ruby's MethodNotImplemented is not derived from StandardError and is used for internal
+ruby errors (fork not implemented)
+
+* (andres) In prefetch_primary_key?, is there anyway to lookup if the "table_name" is indeed partitioned before returning false?
+that function does not have enough context to do the job.  Relation::insert has been updated to call prefetch_primary_key?
+on the ar class.
+
+* move bulkmixin to lib/bulkmixin.rb
+nah
+
+DONE:
+
+* (mark) would rather see "date + 7" be "date + 7.days"
+
+* (mark) put stuff in the README
+
+* (hofer + others) created_at and report_date should be consolidated
+
+* (all) 3 level nesting of classes is confusing -- flatten
+
+* (all) one monolithic file is confusing -- split them out
+
+* (alex) i don't like a class that is half built (as schema_information.rb effectively is)
+I've broken on schema information to two classes schema_information.rb and partitioned_schema_information.rb
+
+* (aaron) the docs on active_record_overrides.rb:arel_attributes_values() are opaque.  fix them.
+
+* (aaron) document the active_record_monkey_patch better please.
+
+* (darrel+all) future and old dates suck -- remove them.
+
+* (all) moar c0m3ntz
+
+* (andrew) Are there going to multiple implementations of insert/update_many? (or, were you able to roll it all into the two methods that I saw)
+one method(each) to rule them all.  that is my intention.  the signatures for {create,update}_many has changed because of this.
+they will exist in Base
+
+* (artur) use functional expressions instead of multi-line in specify_partition
+
+* (alex+artur) remove rdocs from svn
+
+* (keith) ensure referenced_by_id adds references to partitioned (child) tables
+
+* (keith) bulkmixin::create_many should handle created_at and id 
+
+* (keith) loop_over_children should be called: each_child
+
+* (keith) loop_over_children's arguments should be [for child], [for grandchild], [for great grandchild] instead of
+(start)[a, b, c], (end)[d, e, f]
+
+* (keith) by_foreign_key should be able to take :all or a list of ids
+
+* (keith) use dsl for partitioning configuration
+
+* (keith) loop_over_children should be called: each_child
+
+* (keith) loop_over_children's arguments should be [for child], [for grandchild], [for great grandchild] instead of
+(start)[a, b, c], (end)[d, e, f]
+
+* (keith)( by_foreign_key should be able to take :all or a list of ids
+
+* (keith) by_report_date, by_created_at, by_id all pass their field's name to
+  upper classes (partitioned_table_schema_information), but this field
+  is also named in the activerecord::base derived class.  in the ar
+  class it is an array so it can represent multi level partitioning.
+  we should have a method that acquire the name from the ar class
+  from the schema_information class
+
+* (mark) report_date is not generic enough
+
+* (artur) spell override correctly in file names
+
+* (keith) fix loop of children to loop over all children not just left sides leaf partition set
+
+* (keith) in multi-level -- references and indexes should be applied uniquely.
+
+* (keith) make by_id_by_time use both classes
+

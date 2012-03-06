@@ -1,0 +1,21 @@
+module Partitioned
+  class ByForeignKey < ByIntegerField
+    self.abstract_class = true
+
+    def self.partition_integer_field
+      return partition_foreign_key
+    end
+
+    def self.partition_foreign_key
+      raise MethodNotImplemented.new(self, :partition_foreign_key)
+    end
+
+    partitioned do |partition|
+      partition.foreign_key lambda {|model, foreign_key_value|
+        return Configurator::Data::ForeignKey.new(model.partition_foreign_key,
+                                                  ActiveSupport::Inflector::pluralize(model.partition_foreign_key.to_s.sub(/_id$/,'')),
+                                                  :id)
+      }
+    end
+  end
+end
