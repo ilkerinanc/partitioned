@@ -58,13 +58,19 @@ Employee.create_infrastructure
 Employee.create_new_partition_tables(Range.new(0, NUM_EMPLOYEES).step(Employee.partition_table_size))
 
 # You should have the following tables:
-# XXX
+#  employees_partitions.p0
+#  employees_partitions.p10
+#  employees_partitions.p20
+#  ........................
+#  employees_partitions.p5000
 
 # now add some employees across the year.
 
 employees = []
 
 require 'lib/roman'
+
+# generates data for employees_partitions and employees tables
 
 (1..NUM_EMPLOYEES).each do |i|
   employees << {

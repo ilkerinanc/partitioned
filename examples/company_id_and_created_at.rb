@@ -69,16 +69,18 @@ Employee.create_new_partition_tables(partition_key_values)
 #  employees_partitions.p2
 #  employees_partitions.p3
 #  employees_partitions.p4
-#  employees_partitions.p1_20110101 - employees_partitions.p1_20111230
-#  employees_partitions.p2_20110101 - employees_partitions.p2_20111230
-#  employees_partitions.p3_20110101 - employees_partitions.p3_20111230
-#  employees_partitions.p4_20110101 - employees_partitions.p4_20111230
+#  employees_partitions.p1_20101227 - employees_partitions.p1_20111226
+#  employees_partitions.p2_20101227 - employees_partitions.p2_20111226
+#  employees_partitions.p3_20101227 - employees_partitions.p3_20111226
+#  employees_partitions.p4_20101227 - employees_partitions.p4_20111226
 
 # now add some employees across the year.
 
 employees = []
 
 require 'lib/roman'
+
+# generates data for employees_partitions and employees tables
 
 (1..NUM_EMPLOYEES).each do |i|
   employees << {

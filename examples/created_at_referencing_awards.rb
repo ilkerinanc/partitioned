@@ -79,17 +79,26 @@ end
 # create the infrastructure for EMPLOYEES table which includes the schema and partition tables
 
 Employee.create_infrastructure
+
+# create the infrastructure for Awards table which includes the schema and partition tables
+
 Award.create_infrastructure
 
 # You should have the following schema:
 #  employees_partitions
+#  awards_partitions
 
 dates = Employee.partition_generate_range(START_DATE, END_DATE)
+
 Employee.create_new_partition_tables(dates)
+
+# You should have the following tables with increments of one week:
+#   employees_partitions.p20101227 - employees_partitions.p20111226
+
 Award.create_new_partition_tables(dates)
 
-# You should have the following tables:
-#   XXX
+# You should have the following tables with increments of one week:
+#   awards_partitions.p20101227 - awards_partitions.p20111226
 
 # add some companies
 
@@ -102,6 +111,8 @@ employees = []
 
 require 'lib/roman'
 
+# generates data for employees_partitions and employees tables
+
 (1..NUM_EMPLOYEES).each do |i|
   employees << {
     :name => "Winston J. Sillypants, #{to_roman(i)}",
@@ -112,6 +123,8 @@ require 'lib/roman'
 end
 
 Employee.create_many(employees)
+
+# generates data for awards_partitions and awards tables
 
 awards = []
 (1..NUM_AWARDS).each do |i|

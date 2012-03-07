@@ -61,8 +61,8 @@ Employee.create_infrastructure
 dates = Employee.partition_generate_range(START_DATE, END_DATE)
 Employee.create_new_partition_tables(dates)
 
-# You should have the following tables:
-#   XXX
+# You should have the following tables with increments of one month:
+#  employees_partitions.p201101 - employees_partitions.p201112
 
 # add some companies
 
@@ -74,6 +74,8 @@ company_ids = Company.all.map(&:id)
 employees = []
 
 require 'lib/roman'
+
+# generates data for employees_partitions and employees tables
 
 (1..NUM_EMPLOYEES).each do |i|
   employees << {

@@ -46,7 +46,7 @@ end
 Employee.create_infrastructure
 
 # You should have the following schema:
-#  employees_partitions
+# employees_partitions
 
 # add some companies
 
@@ -58,13 +58,18 @@ company_ids = Company.all.map(&:id)
 Employee.create_new_partition_tables(company_ids)
 
 # You should have the following tables:
-# XXX
+#  employees_partitions.p1
+#  employees_partitions.p2
+#  employees_partitions.p3
+#  employees_partitions.p4
 
 # now add some employees across the year.
 
 employees = []
 
 require 'lib/roman'
+
+# generates data for employees_partitions and employees tables
 
 (1..NUM_EMPLOYEES).each do |i|
   employees << {
