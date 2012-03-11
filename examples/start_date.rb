@@ -15,7 +15,7 @@ NUM_EMPLOYEES = 5000
 
 # the ActiveRecord classes
 
-require 'lib/company'
+require File.expand_path(File.dirname(__FILE__) + "/lib/company")
 
 class Partitioned::ByStartDate < Partitioned::ByMonthlyTimeField
   self.abstract_class = true
@@ -62,7 +62,18 @@ dates = Employee.partition_generate_range(START_DATE, END_DATE)
 Employee.create_new_partition_tables(dates)
 
 # You should have the following tables with increments of one month:
-#  employees_partitions.p201101 - employees_partitions.p201112
+#  employees_partitions.p201101
+#  employees_partitions.p201102
+#  employees_partitions.p201103
+#  employees_partitions.p201104
+#  employees_partitions.p201105
+#  employees_partitions.p201106
+#  employees_partitions.p201107
+#  employees_partitions.p201108
+#  employees_partitions.p201109
+#  employees_partitions.p201110
+#  employees_partitions.p201111
+#  employees_partitions.p201112
 
 # add some companies
 
@@ -73,7 +84,7 @@ company_ids = Company.all.map(&:id)
 
 employees = []
 
-require 'lib/roman'
+require File.expand_path(File.dirname(__FILE__) + "/lib/roman")
 
 # generates data for employees_partitions and employees tables
 

@@ -13,8 +13,8 @@ NUM_EMPLOYEES = 5000
 
 # the ActiveRecord classes
 
-require 'lib/company'
-require 'lib/by_company_id'
+require File.expand_path(File.dirname(__FILE__) + "/lib/company")
+require File.expand_path(File.dirname(__FILE__) + "/lib/by_company_id")
 
 class Employee < ByCompanyId
   belongs_to :company, :class_name => 'Company'
@@ -67,7 +67,7 @@ Employee.create_new_partition_tables(company_ids)
 
 employees = []
 
-require 'lib/roman'
+require File.expand_path(File.dirname(__FILE__) + "/lib/roman")
 
 # generates data for employees_partitions and employees tables
 

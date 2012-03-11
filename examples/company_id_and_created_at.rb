@@ -14,8 +14,8 @@ END_DATE = Date.parse('2011-12-31')
 NUM_EMPLOYEES = 5000
 
 # the ActiveRecord classes
-require 'lib/company'
-require 'lib/by_company_id'
+require File.expand_path(File.dirname(__FILE__) + "/lib/company")
+require File.expand_path(File.dirname(__FILE__) + "/lib/by_company_id")
 
 class Employee < Partitioned::MultiLevel
   belongs_to :company, :class_name => 'Company'
@@ -69,7 +69,61 @@ Employee.create_new_partition_tables(partition_key_values)
 #  employees_partitions.p2
 #  employees_partitions.p3
 #  employees_partitions.p4
-#  employees_partitions.p1_20101227 - employees_partitions.p1_20111226
+#  employees_partitions.p1_20101227
+#  employees_partitions.p1_20110103
+#  employees_partitions.p1_20110110
+#  employees_partitions.p1_20110117
+#  employees_partitions.p1_20110124
+#  employees_partitions.p1_20110131
+#  employees_partitions.p1_20110207
+#  employees_partitions.p1_20110214
+#  employees_partitions.p1_20110221
+#  employees_partitions.p1_20110228
+#  employees_partitions.p1_20110307
+#  employees_partitions.p1_20110314
+#  employees_partitions.p1_20110321
+#  employees_partitions.p1_20110328
+#  employees_partitions.p1_20110404
+#  employees_partitions.p1_20110411
+#  employees_partitions.p1_20110418
+#  employees_partitions.p1_20110425
+#  employees_partitions.p1_20110502
+#  employees_partitions.p1_20110509
+#  employees_partitions.p1_20110516
+#  employees_partitions.p1_20110523
+#  employees_partitions.p1_20110530
+#  employees_partitions.p1_20110606
+#  employees_partitions.p1_20110613
+#  employees_partitions.p1_20110620
+#  employees_partitions.p1_20110627
+#  employees_partitions.p1_20110704
+#  employees_partitions.p1_20110711
+#  employees_partitions.p1_20110718
+#  employees_partitions.p1_20110725
+#  employees_partitions.p1_20110801
+#  employees_partitions.p1_20110808
+#  employees_partitions.p1_20110815
+#  employees_partitions.p1_20110822
+#  employees_partitions.p1_20110829
+#  employees_partitions.p1_20110905
+#  employees_partitions.p1_20110912
+#  employees_partitions.p1_20110919
+#  employees_partitions.p1_20110926
+#  employees_partitions.p1_20111003
+#  employees_partitions.p1_20111010
+#  employees_partitions.p1_20111017
+#  employees_partitions.p1_20111024
+#  employees_partitions.p1_20111031
+#  employees_partitions.p1_20111107
+#  employees_partitions.p1_20111114
+#  employees_partitions.p1_20111121
+#  employees_partitions.p1_20111128
+#  employees_partitions.p1_20111205
+#  employees_partitions.p1_20111212
+#  employees_partitions.p1_20111219
+#  employees_partitions.p1_20111226
+#  For the next three lines the similar partitions are generated.
+#  Difference only in company_id prefix.
 #  employees_partitions.p2_20101227 - employees_partitions.p2_20111226
 #  employees_partitions.p3_20101227 - employees_partitions.p3_20111226
 #  employees_partitions.p4_20101227 - employees_partitions.p4_20111226
@@ -78,7 +132,7 @@ Employee.create_new_partition_tables(partition_key_values)
 
 employees = []
 
-require 'lib/roman'
+require File.expand_path(File.dirname(__FILE__) + "/lib/roman")
 
 # generates data for employees_partitions and employees tables
 

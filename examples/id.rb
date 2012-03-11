@@ -13,7 +13,7 @@ NUM_EMPLOYEES = 5000
 
 # the ActiveRecord classes
 
-require 'lib/company'
+require File.expand_path(File.dirname(__FILE__) + "/lib/company")
 
 class Employee < Partitioned::ById
   belongs_to :company, :class_name => 'Company'
@@ -61,14 +61,16 @@ Employee.create_new_partition_tables(Range.new(0, NUM_EMPLOYEES).step(Employee.p
 #  employees_partitions.p0
 #  employees_partitions.p10
 #  employees_partitions.p20
-#  ........................
+#  ...
+#  employees_partitions.p4980
+#  employees_partitions.p4990
 #  employees_partitions.p5000
 
 # now add some employees across the year.
 
 employees = []
 
-require 'lib/roman'
+require File.expand_path(File.dirname(__FILE__) + "/lib/roman")
 
 # generates data for employees_partitions and employees tables
 
