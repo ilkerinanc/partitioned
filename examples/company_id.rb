@@ -2,6 +2,159 @@
 # if you use linux, please change previous line to the
 # "#!../../../../script/rails runner"
 
+# Initial data:
+#
+#  Companies table is completed by four companies:
+#
+#  id |         created_at         | updated_at |        name
+#  ---+----------------------------+------------+---------------------
+#   1 | 2012-03-11 13:26:52.184347 |            | Fluent Mobile, inc.
+#   2 | 2012-03-11 13:26:52.184347 |            | Fiksu, inc.
+#   3 | 2012-03-11 13:26:52.184347 |            | AppExchanger, inc.
+#   4 | 2012-03-11 13:26:52.184347 |            | FreeMyApps, inc.
+#
+#  Employees table is associated with companies table via key - id:
+#
+#   id | created_at | updated_at | name | salary | company_id
+#  ----+------------+------------+------+--------+------------
+#
+# Task:
+#
+#  To increase the speed of requests to the database and to reduce the time
+#  of the request, need to split the Employees table to the partition tables.
+#  Break criterion is a company (company_id).
+#
+# Implementation:
+#
+#  Class Employee inherits from the abstract class ByCompanyId,
+#  which supports partitioning.
+#
+#  class Employee < ByCompanyId
+#
+#    Indicates a relationship to the companies table.
+#    belongs_to :company, :class_name => 'Company'
+#
+#    Create a rules for each partition.
+#    Id is a unique index. Foreign key is company_id.
+#    This imposes a restriction on each of partition, that
+#    the column company_id associated with the table of companies
+#    and can not have values ​​that are not in the table companies.
+#    In this example, set up only 4 records in the table companies,
+#    so company_id can not be equal to 5 in any partition
+#    until it is an established company with id = 5.
+#
+#    partitioned do |partition|
+#      partition.index :id, :unique => true
+#      partition.foreign_key :company_id
+#    end
+#  end
+#
+#  Create a schema employees_partitions, within which to store all of our partitions:
+#
+#  Employee.create_infrastructure
+#
+#  Create a partition for each company:
+#
+#  company_ids = Company.all.map(&:id)
+#  Employee.create_new_partition_tables(company_ids)
+#
+#  Since we have done four records of companies in the table,
+#  we have four partitions:
+#
+#  employees_partitions.p1
+#  employees_partitions.p2
+#  employees_partitions.p3
+#  employees_partitions.p4
+#
+#  Each of partition has the same structure as that of the employees table:
+#
+#   id | created_at | updated_at | name | salary | company_id
+#  ----+------------+------------+------+--------+------------
+#
+#  Each of partitions inherits from employees table,
+#  thus a new row will automatically be added to the employees table .
+#
+#  To add data, we use the following construction,
+#  in which employees - a random data:
+#
+#  Employee.create_many(employees)
+#
+#  The data get into the employees table ONLY through partition tables.
+#  You can not do an insert row into a table employees directly.
+#  For this purpose special restrictions are imposed on the table employees.
+#
+#  Result:
+#
+#  We have table companies:
+#
+#  id |         created_at         | updated_at |        name
+#  ---+----------------------------+------------+---------------------
+#   1 | 2012-03-11 13:26:52.184347 |            | Fluent Mobile, inc.
+#   2 | 2012-03-11 13:26:52.184347 |            | Fiksu, inc.
+#   3 | 2012-03-11 13:26:52.184347 |            | AppExchanger, inc.
+#   4 | 2012-03-11 13:26:52.184347 |            | FreeMyApps, inc.
+#
+#  Table employees with random data from 1 to 5000:
+#
+#   id |         created_at         | updated_at |            name                     | salary | company_id
+#  ----+----------------------------+------------+-------------------------------------+--------+------------
+#    1 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, I            | 183.00 |     2
+#    2 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, II           | 145.00 |     1
+#    3 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, III          | 229.00 |     3
+#   ...
+# 4998 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVIII | 456.00 |     4
+# 4999 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCIX   | 751.00 |     3
+# 5000 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, _V           | 356.00 |     2
+#
+#  Partition employees_partitions.p1 - partition where company_id = 1:
+#
+#   id |         created_at         | updated_at |            name                     | salary | company_id
+#  ----+----------------------------+------------+-------------------------------------+--------+------------
+#    2 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, II           | 145.00 |     1
+#    8 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, XIII         | 307.00 |     1
+#   12 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, XVII         | 812.00 |     1
+#   ...
+# 4986 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXXVI | 65.00  |     1
+# 4995 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCV    | 316.00 |     1
+# 4997 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVII  | 119.00 |     1
+#
+#  Partition employees_partitions.p2 - partition where company_id = 2:
+#
+#   id |         created_at         | updated_at |            name                     | salary | company_id
+#  ----+----------------------------+------------+-------------------------------------+--------+------------
+#    1 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, I            | 183.00 |     2
+#    9 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, IX           | 840.00 |     2
+#   11 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, XI           | 943.00 |     2
+#   ...
+# 4994 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCIV   | 712.00 |     2
+# 4996 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVI   | 127.00 |     2
+# 5000 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, _V           | 356.00 |     2
+#
+#  Partition employees_partitions.p3 - partition where company_id = 3:
+#
+#   id |         created_at         | updated_at |            name                     | salary | company_id
+#  ----+----------------------------+------------+-------------------------------------+--------+------------
+#    3 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, III          |  229.00 |    3
+#    4 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, IV           |  475.00 |    3
+#    6 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, VI           |  997.00 |    3
+#   ...
+# 4974 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXIV  |  405.00 |    3
+# 4982 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXXII |  497.00 |    3
+# 4999 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCIX   |  751.00 |    3
+#
+#  Partition employees_partitions.p4 - partition where company_id = 4:
+#
+#   id |         created_at         | updated_at |            name                     | salary | company_id
+#  ----+----------------------------+------------+-------------------------------------+--------+------------
+#    5 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, V            | 609.00 |     4
+#    7 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, VII          | 348.00 |     4
+#   10 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, X            | 744.00 |     4
+#   ...
+# 4989 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXXIX | 224.00 |     4
+# 4991 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCI    | 728.00 |     4
+# 4998 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVIII | 456.00 |     4
+#
+
 if ['--cleanup', '--force'].include?(ARGV[0])
   ActiveRecord::Base.connection.drop_schema("employees_partitions", :cascade => true) rescue nil
   ActiveRecord::Base.connection.drop_table("employees") rescue nil
