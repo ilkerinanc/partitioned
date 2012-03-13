@@ -6,6 +6,19 @@
 #
 #  Companies table is completed by four companies:
 #
+#  create table companies (
+#        id               serial not null primary key,
+#        created_at       timestamp not null default now(),
+#        updated_at       timestamp,
+#        name             text null
+#  );
+#
+#  insert into companies (created_at,id,name) values
+#    ('2012-03-13 13:26:52.184347',1,'Fluent Mobile, inc.'),
+#    ('2012-03-13 13:26:52.184347',2,'Fiksu, inc.'),
+#    ('2012-03-13 13:26:52.184347',3,'AppExchanger, inc.'),
+#    ('2012-03-13 13:26:52.184347',4,'FreeMyApps, inc.');
+#
 #  id |         created_at         | updated_at |        name
 #  ---+----------------------------+------------+---------------------
 #   1 | 2012-03-11 13:26:52.184347 |            | Fluent Mobile, inc.
@@ -14,6 +27,15 @@
 #   4 | 2012-03-11 13:26:52.184347 |            | FreeMyApps, inc.
 #
 #  Employees table is associated with companies table via key - id:
+#
+#  create table employees (
+#        id               serial not null primary key,
+#        created_at       timestamp not null default now(),
+#        updated_at       timestamp,
+#        name             text not null,
+#        salary           money not null,
+#        company_id       integer not null
+#  );
 #
 #   id | created_at | updated_at | name | salary | company_id
 #  ----+------------+------------+------+--------+------------
@@ -53,10 +75,31 @@
 #
 #  Employee.create_infrastructure
 #
-#  Create a partition for each company:
+#  Create a partitions for each company:
 #
 #  company_ids = Company.all.map(&:id)
 #  Employee.create_new_partition_tables(company_ids)
+#
+#  Each of partition has the same structure as that of the employees table:
+#
+#   id | created_at | updated_at | name | salary | company_id
+#  ----+------------+------------+------+--------+------------
+#
+#  CREATE TABLE "employees_partitions"."p1" (CHECK (( company_id = 1 ))) INHERITS (employees);
+#  CREATE UNIQUE INDEX "index_employees_partitions.p1_on_id" ON "employees_partitions"."p1" ("id");
+#  ALTER TABLE employees_partitions.p1 add foreign key (company_id) references companies(id);
+#
+#  CREATE TABLE "employees_partitions"."p2" (CHECK (( company_id = 2 ))) INHERITS (employees);
+#  CREATE UNIQUE INDEX "index_employees_partitions.p2_on_id" ON "employees_partitions"."p2" ("id");
+#  ALTER TABLE employees_partitions.p2 add foreign key (company_id) references companies(id);
+#
+#  CREATE TABLE "employees_partitions"."p3" (CHECK (( company_id = 3 ))) INHERITS (employees);
+#  CREATE UNIQUE INDEX "index_employees_partitions.p3_on_id" ON "employees_partitions"."p3" ("id");
+#  ALTER TABLE employees_partitions.p3 add foreign key (company_id) references companies(id);
+#
+#  CREATE TABLE "employees_partitions"."p4" (CHECK (( company_id = 4 ))) INHERITS (employees);
+#  CREATE UNIQUE INDEX "index_employees_partitions.p4_on_id" ON "employees_partitions"."p4" ("id");
+#  ALTER TABLE employees_partitions.p4 add foreign key (company_id) references companies(id);
 #
 #  Since we have done four records of companies in the table,
 #  we have four partitions:
@@ -65,11 +108,6 @@
 #  employees_partitions.p2
 #  employees_partitions.p3
 #  employees_partitions.p4
-#
-#  Each of partition has the same structure as that of the employees table:
-#
-#   id | created_at | updated_at | name | salary | company_id
-#  ----+------------+------------+------+--------+------------
 #
 #  Each of partitions inherits from employees table,
 #  thus a new row will automatically be added to the employees table .
@@ -205,7 +243,7 @@ Employee.create_infrastructure
 
 Company.create_many(COMPANIES)
 
-# create the employee partitions dependant on the all companies
+# create the employees partitions dependant on the all companies
 
 company_ids = Company.all.map(&:id)
 Employee.create_new_partition_tables(company_ids)
@@ -215,8 +253,6 @@ Employee.create_new_partition_tables(company_ids)
 #  employees_partitions.p2
 #  employees_partitions.p3
 #  employees_partitions.p4
-
-# now add some employees across the year.
 
 employees = []
 
