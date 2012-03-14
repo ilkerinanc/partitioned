@@ -99,6 +99,9 @@ module Partitioned
       new_arel_table = @arel_tables[key_values]
       arel_engine_hash = {:engine => self.arel_engine}
       arel_engine_hash[:as] = as unless as.blank?
+      puts "****1"
+      puts key_values.inspect
+      puts "@@@@1"
       new_arel_table = Arel::Table.new(self.partition_name(*key_values), arel_engine_hash)
       return new_arel_table
     end
@@ -269,6 +272,9 @@ module Partitioned
       # the full name of a child table defined by the partition key values
       #
       partition.table_name lambda {|model, *partition_key_values|
+        puts "****3"
+        puts partition_key_values.inspect
+        puts "@@@@3"
         configurator = model.configurator
         return "#{configurator.schema_name}.#{configurator.part_name(*partition_key_values)}"
       }
