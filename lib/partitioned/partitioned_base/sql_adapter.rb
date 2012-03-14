@@ -168,14 +168,14 @@ module Partitioned
       # used to create index names
       #
       def index_name(name, *partition_key_values)
-        return "#{configurator.encoded_name(*partition_key_values)}_#{name}_idx"
+        return "#{configurator.part_name(*partition_key_values)}_#{name}_idx"
       end
 
       #
       # used to create index names
       #
       def unique_index_name(name, *partition_key_values)
-        return "#{configurator.encoded_name(*partition_key_values)}_#{name}_udx"
+        return "#{configurator.part_name(*partition_key_values)}_#{name}_udx"
       end
 
       #
