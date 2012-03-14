@@ -149,6 +149,10 @@ module Partitioned
       #
       def add_partition_table_index(*partition_key_values)
         configurator.indexes(*partition_key_values).each do |field,options|
+          unless options.has_key?(:name)
+            name = [*field].join('_')
+            options[:name] = options[:unique] ? unique_index_name(name) : index_name(name)
+          end
           add_index(partition_table_name(*partition_key_values), field, options)
         end
       end
