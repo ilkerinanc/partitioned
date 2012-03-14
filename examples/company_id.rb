@@ -210,11 +210,6 @@ require File.expand_path(File.dirname(__FILE__) + "/lib/by_company_id")
 class Employee < ByCompanyId
   belongs_to :company, :class_name => 'Company'
 
-  partitioned do |partition|
-    partition.index :id, :unique => true
-    partition.foreign_key :company_id
-  end
-
   connection.execute <<-SQL
     create table employees
     (
