@@ -1,3 +1,5 @@
+$LOAD_PATH.push File.expand_path("../lib", __FILE__)
+
 Gem::Specification.new do |s|
  s.name        = 'partitioned'
  s.version     = '0.8.0'

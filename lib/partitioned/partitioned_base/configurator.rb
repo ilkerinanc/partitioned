@@ -1,5 +1,5 @@
 module Partitioned
-  class PartitionedBase
+  class PartitionedBase < ActiveRecord::Base
     module Configurator
     end
   end

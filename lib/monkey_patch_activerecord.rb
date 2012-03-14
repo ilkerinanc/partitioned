@@ -5,12 +5,12 @@ require 'active_record/relation.rb'
 require 'active_record/connection_adapters/abstract/connection_pool'
 
 #
-# patching activrecord to allow specifying the table name as a function of
+# patching activerecord to allow specifying the table name as a function of
 # attributes
 #
 module ActiveRecord
   #
-  # patches for relation to allow backhooks into the activerecord
+  # patches for relation to allow back hooks into the activerecord
   # requesting name of table as a function of attributes
   #
   class Relation
