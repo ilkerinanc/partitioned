@@ -121,7 +121,7 @@ module Partitioned
       # the name of the table (schemaname.childtablename) given the check constraint values.
       #
       def partition_table_name(*partition_key_values)
-        configurator.table_name(*partition_key_values)
+        return configurator.table_name(*partition_key_values)
       end
 
       #
@@ -149,7 +149,12 @@ module Partitioned
       #
       def add_partition_table_index(*partition_key_values)
         configurator.indexes(*partition_key_values).each do |field,options|
-          add_index(partition_table_name(*partition_key_values), field, options)
+          used_options = options.clone
+          unless used_options.has_key?(:name)
+            name = [*field].join('_')
+            used_options[:name] = used_options[:unique] ? unique_index_name(name, *partition_key_values) : index_name(name, *partition_key_values)
+          end
+          add_index(partition_table_name(*partition_key_values), field, used_options)
         end
       end
 
@@ -164,14 +169,14 @@ module Partitioned
       # used to create index names
       #
       def index_name(name, *partition_key_values)
-        return "#{configurator.encoded_name(*partition_key_values)}_#{name}_idx"
+        return "#{configurator.part_name(*partition_key_values)}_#{name}_idx"
       end
 
       #
       # used to create index names
       #
       def unique_index_name(name, *partition_key_values)
-        return "#{configurator.encoded_name(*partition_key_values)}_#{name}_udx"
+        return "#{configurator.part_name(*partition_key_values)}_#{name}_udx"
       end
 
       #

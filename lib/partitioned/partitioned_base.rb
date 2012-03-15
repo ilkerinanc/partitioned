@@ -44,7 +44,8 @@ module Partitioned
     # #partition_keys
     #
     def self.partition_key_values(values)
-      return self.partition_keys.map{|key| (values[key] || values[key.to_sym])}
+      symbolized_values = values.symbolize_keys
+      return self.partition_keys.map{|key| symbolized_values[key.to_sym]}
     end
 
     #
