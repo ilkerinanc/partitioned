@@ -96,7 +96,7 @@ module ActiveRecord
         pool_key = connection_pools_hash_key(klass)
         # @connections_pools used for rails version < 3.2
         # @class_to_pool user for rails version 3.2
-        pool = @connection_pools[pool_key] || @class_to_pool.try(pool_key)
+        pool = @connection_pools[pool_key] || (@class_to_pool[pool_key] if defined? @class_to_pool)
         @connection_pools.delete_if { |key, value| value == pool }
         pool.disconnect! if pool
         pool.spec.config if pool
@@ -110,7 +110,7 @@ module ActiveRecord
         pool_key = connection_pools_hash_key(klass)
         # @connections_pools used for rails version < 3.2
         # @class_to_pool user for rails version 3.2
-        pool = @connection_pools[pool_key] || @class_to_pool.try(pool_key)
+        pool = @connection_pools[pool_key] || (@class_to_pool[pool_key] if defined? @class_to_pool)
 
         return pool if pool
         return nil if ActiveRecord::Base == klass

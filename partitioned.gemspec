@@ -12,4 +12,8 @@ Gem::Specification.new do |s|
  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
  s.require_path = 'lib'
  s.homepage    = 'http://www.fiksu.com'
+ s.add_dependency('pg')
+ s.add_dependency('activerecord', '>= 2.3.0')
+ s.add_dependency('activesupport', '>= 2.3.2')
+ s.add_dependency('rspec-rails')
 end
