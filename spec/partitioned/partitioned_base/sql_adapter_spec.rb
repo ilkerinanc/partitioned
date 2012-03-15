@@ -166,7 +166,7 @@ module Partitioned
           sql_adapter.add_partition_table_index(1)
           result = ActiveRecord::Base.connection.execute <<-SQL
             SELECT count(*) FROM pg_class
-            where relname = 'index_employees_partitions.p1_on_id'
+            where relname = 'p1_id_udx'
           SQL
           result.values.should == [["1"]]
         end
