@@ -121,9 +121,6 @@ module Partitioned
       # the name of the table (schemaname.childtablename) given the check constraint values.
       #
       def partition_table_name(*partition_key_values)
-        puts "****2"
-        puts partition_key_values.inspect
-        puts "@@@@2"
         return configurator.table_name(*partition_key_values)
       end
 
