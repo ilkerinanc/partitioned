@@ -100,6 +100,11 @@ module Partitioned
       arel_engine_hash = {:engine => self.arel_engine}
       arel_engine_hash[:as] = as unless as.blank?
       puts "****1"
+      puts '>self.partition_keys:'
+      puts self.partition_keys.inspect
+      puts '>values:'
+      puts values.inspect
+      puts '>key_values:'
       puts key_values.inspect
       puts "@@@@1"
       new_arel_table = Arel::Table.new(self.partition_name(*key_values), arel_engine_hash)
