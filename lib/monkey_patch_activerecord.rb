@@ -3,7 +3,6 @@ require 'active_record/base'
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/relation.rb'
 require 'active_record/persistence.rb'
-require 'active_record/connection_adapters/abstract/connection_pool'
 
 #
 # patching activerecord to allow specifying the table name as a function of
@@ -96,74 +95,6 @@ module ActiveRecord
         primary_key_value,
         nil,
         binds)
-    end
-  end
-
-  module ConnectionAdapters
-    class ConnectionHandler
-      # Remove the connection for this class. This will close the active
-      # connection and the defined connection (if they exist). The result
-      # can be used as an argument for establish_connection, for easily
-      # re-establishing the connection.
-      #
-      # NOTE: 2011-05-17 changed the connection pools key to come from
-      # connection_pools_hash_key, to help avoid spawning lots of database
-      # connection pools when using multiple databases.
-      def remove_connection(klass)
-        #pool = @connection_pools[klass.name]
-        pool_key = connection_pools_hash_key(klass)
-        # @connections_pools used for rails version < 3.2
-        # @class_to_pool user for rails version 3.2
-        pool = @connection_pools[pool_key] || (@class_to_pool[pool_key] if defined? @class_to_pool)
-        @connection_pools.delete_if { |key, value| value == pool }
-        pool.disconnect! if pool
-        pool.spec.config if pool
-      end
-
-      # NOTE: 2011-05-17 changed the connection pools key to come from
-      # connection_pools_hash_key, to help avoid spawning lots of database
-      # connection pools when using multiple databases.
-      def retrieve_connection_pool(klass)
-        #pool = @connection_pools[klass.name]
-        pool_key = connection_pools_hash_key(klass)
-        # @connections_pools used for rails version < 3.2
-        # @class_to_pool user for rails version 3.2
-        pool = @connection_pools[pool_key] || (@class_to_pool[pool_key] if defined? @class_to_pool)
-
-        return pool if pool
-        return nil if ActiveRecord::Base == klass
-        retrieve_connection_pool klass.superclass
-      end
-
-      # Returns the value of the class's connection_pools_hash_key method if
-      # there is one, defaulting to the class name.
-      # 
-      # Ordinarily, ActiveRecord has trouble dealing with connection pools
-      # when using multiple databases. ActiveRecord will normally recursively
-      # walk up the inheritance chain until it finds an existing connection
-      # pool, or reaches ActiveRecord::Base (see retrieve_connection_pool).
-      # If an application uses multiple databases, for each database other 
-      # than the default one that ActiveRecord::Base connects to, all models
-      # using that database should therefore descend from a single base class
-      # that calls establish_connection; otherwise, Rails will create a
-      # separate connection pool for each model that calls establish_connection,
-      # potentially resulting in many more database connections than necessary.
-      # 
-      # This paradigm can be problematic for models defined in your application
-      # that don't descend directly from ActiveRecord::Base.
-      # 
-      # With the fix below, when such models specify a 
-      # self.connection_pools_hash_key method, the return value of that
-      # will be inspected when searching for a connection pool in the hash.
-      # All models that share the same return value from
-      # connection_pools_hash_key will then share a single connection pool.
-      def connection_pools_hash_key(klass)
-        if klass.respond_to?(:connection_pools_hash_key)
-          return klass.connection_pools_hash_key
-        else
-          return klass.name
-        end
-      end
     end
   end
 end
