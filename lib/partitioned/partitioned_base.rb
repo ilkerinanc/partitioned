@@ -131,7 +131,7 @@ module Partitioned
     #
     # Use as:
     #
-    #   Foo.from_partition_as(KEY).find(:first)
+    #   Foo.from_partition(KEY).find(:first)
     #
     # where KEY is the key value(s) used as the check constraint on Foo's table.
     #
@@ -159,7 +159,7 @@ module Partitioned
     #
     # Use as:
     #
-    #   Foo.from_partition(KEY).find(:all, :select => "*")
+    #   Foo.from_partitioned_without_alias(KEY).find(:all, :select => "*")
     #
     # where KEY is the key value(s) used as the check constraint on Foo's table.
     #
@@ -169,7 +169,7 @@ module Partitioned
     #
     #   SELECT foos.* FROM foos_partitions.pXXX
     #
-    # which fails because table foos is not referenced.  using the scope #from_partition_as
+    # which fails because table foos is not referenced.  using the form #from_partition
     # is almost always the correct thing when using activerecord.
     #
     # Because the scope is specific to a class (a class method) but unlike

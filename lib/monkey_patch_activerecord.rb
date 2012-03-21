@@ -112,7 +112,9 @@ module ActiveRecord
       def remove_connection(klass)
         #pool = @connection_pools[klass.name]
         pool_key = connection_pools_hash_key(klass)
-        pool = @connection_pools[pool_key]
+        # @connections_pools used for rails version < 3.2
+        # @class_to_pool user for rails version 3.2
+        pool = @connection_pools[pool_key] || (@class_to_pool[pool_key] if defined? @class_to_pool)
         @connection_pools.delete_if { |key, value| value == pool }
         pool.disconnect! if pool
         pool.spec.config if pool
@@ -124,7 +126,9 @@ module ActiveRecord
       def retrieve_connection_pool(klass)
         #pool = @connection_pools[klass.name]
         pool_key = connection_pools_hash_key(klass)
-        pool = @connection_pools[pool_key]
+        # @connections_pools used for rails version < 3.2
+        # @class_to_pool user for rails version 3.2
+        pool = @connection_pools[pool_key] || (@class_to_pool[pool_key] if defined? @class_to_pool)
 
         return pool if pool
         return nil if ActiveRecord::Base == klass
@@ -140,7 +144,7 @@ module ActiveRecord
       # pool, or reaches ActiveRecord::Base (see retrieve_connection_pool).
       # If an application uses multiple databases, for each database other 
       # than the default one that ActiveRecord::Base connects to, all models
-      # using that database should thereford descend from a single base class
+      # using that database should therefore descend from a single base class
       # that calls establish_connection; otherwise, Rails will create a
       # separate connection pool for each model that calls establish_connection,
       # potentially resulting in many more database connections than necessary.

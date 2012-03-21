@@ -64,11 +64,6 @@
 #    In this example, set up only 4 records in the table companies,
 #    so company_id can not be equal to 5 in any partition
 #    until it is an established company with id = 5.
-#
-#    partitioned do |partition|
-#      partition.index :id, :unique => true
-#      partition.foreign_key :company_id
-#    end
 #  end
 #
 #  Create a schema employees_partitions, within which to store all of our partitions:

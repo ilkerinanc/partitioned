@@ -88,6 +88,7 @@ module Partitioned
             @using_configurators = []
             using_classes.each do |using_class|
               using_class.ancestors.each do |ancestor|
+                next if ancestor.class == Module
                 @using_configurators << UsingConfigurator.new(using_class, ancestor, ancestor::configurator_dsl) if ancestor::configurator_dsl
                 break if ancestor == Partitioned::PartitionedBase
               end
