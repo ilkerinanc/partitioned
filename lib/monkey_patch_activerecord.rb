@@ -2,6 +2,7 @@ require 'active_record'
 require 'active_record/base'
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/relation.rb'
+require 'active_record/persistence.rb'
 require 'active_record/connection_adapters/abstract/connection_pool'
 
 #
@@ -9,6 +10,23 @@ require 'active_record/connection_adapters/abstract/connection_pool'
 # attributes
 #
 module ActiveRecord
+  module Persistence
+    def create
+      if self.id.nil? && self.class.respond_to?(:prefetch_primary_key?) && self.class.prefetch_primary_key?
+        self.id = connection.next_sequence_value(self.class.sequence_name)
+      end
+
+      attributes_values = arel_attributes_values(!id.nil?)
+
+      new_id = self.class.unscoped.insert attributes_values
+
+      self.id ||= new_id
+
+      IdentityMap.add(self) if IdentityMap.enabled?
+      @new_record = false
+      id
+    end
+  end
   #
   # patches for relation to allow back hooks into the activerecord
   # requesting name of table as a function of attributes
@@ -37,7 +55,7 @@ module ActiveRecord
         #
         # PARTITIONED ADDITION.  prefetch_primary_key as requested by class.
         #
-        if !primary_key_value && @klass.respond_to?(:prefetch_primary_key?)
+        if !primary_key_value && @klass.respond_to?(:prefetch_primary_key?) && @klass.prefetch_primary_key?
           primary_key_value = connection.next_sequence_value(klass.sequence_name)
           values[klass.arel_table[klass.primary_key]] = primary_key_value
         end

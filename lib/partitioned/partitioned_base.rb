@@ -53,7 +53,8 @@ module Partitioned
     # define the key value(s) for the constraint check.
     #
     def partition_table_name
-      return self.class.partition_name(*self.class.partition_keys.map{|attribute_name| attributes[attribute_name]})
+      symbolized_attributes = attributes.symbolize_keys
+      return self.class.partition_name(*self.class.partition_keys.map{|attribute_name| symbolized_attributes[attribute_name]})
     end
 
     #
@@ -109,7 +110,8 @@ module Partitioned
     # current attributes.
     #
     def dynamic_arel_table(as = nil)
-      key_values = Hash[*self.class.partition_keys.map{|name| [name,read_attribute(name)]}.flatten]
+      symbolized_attributes = attributes.symbolize_keys
+      key_values = Hash[*self.class.partition_keys.map{|name| [name,symbolized_attributes[name]]}.flatten]
       return self.class.dynamic_arel_table(key_values, as)
     end
 

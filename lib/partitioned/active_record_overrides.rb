@@ -12,7 +12,7 @@ module Partitioned
     # the standard release of this function gathers a collection of attributes and creates a wrapper function around them
     # that names the table they are associated with. that naming is incorrect for partitioned tables.
     #
-    # we class the standard release's method then retrofit our partitioned table into the hash that is returned.
+    # we call the standard release's method then retrofit our partitioned table into the hash that is returned.
     #
     def arel_attributes_values(include_primary_key = true, include_readonly_attributes = true, attribute_names = @attributes.keys)
       attrs = super
