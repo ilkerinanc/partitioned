@@ -316,7 +316,6 @@ $create_individual = 1000
 $new_individual = 1000
 $update_many = 1000
 $update_individual = 1000
-$partition_table_size = 10
 
 @options = {
   "--cleanup" => {
