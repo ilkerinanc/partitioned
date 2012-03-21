@@ -285,7 +285,7 @@ $partition_table_size = 10
   "--update-individual" => {
     :short => "-u",
     :argument => GetoptLong::REQUIRED_ARGUMENT,
-    :note => "how many objects to update indivudually",
+    :note => "how many objects to update individually",
     :argument_note => "NUMBER"
   },
   "--update-many" => {
@@ -371,7 +371,8 @@ Employee.create_infrastructure
 
 # Create a partition tables with increments of 10 records, because
 # Employee.partition_table_size returns 10
-Employee.create_new_partition_tables(Range.new(0, $total_records).step(Employee.partition_table_size))
+ids = Employee.partition_generate_range(0, $total_records, $partition_table_size)
+Employee.create_new_partition_tables(ids)
 
 # You should have the following tables:
 #  employees_partitions.p0
