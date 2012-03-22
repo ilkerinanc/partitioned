@@ -2,19 +2,95 @@
 # if you use linux, please change previous line to the
 # "#!../../../../script/rails runner"
 
-if ['--cleanup', '--force'].include?(ARGV[0])
+require File.expand_path(File.dirname(__FILE__) + "/lib/command_line_tool_mixin")
+require File.expand_path(File.dirname(__FILE__) + "/lib/get_options")
+
+include CommandLineToolMixin
+
+$cleanup = false
+$force = false
+$create_many = 1500
+$create_individual = 500
+$new_individual = 500
+$update_many = 500
+$update_individual = 500
+
+@options = {
+  "--cleanup" => {
+    :short => "-C",
+    :argument => GetoptLong::NO_ARGUMENT,
+    :note => "cleanup data in database and exit"
+  },
+  "--force" => {
+    :short => "-F",
+    :argument => GetoptLong::NO_ARGUMENT,
+    :note => "cleanup data in database before creating new data"
+  },
+  "--create-many" => {
+    :short => "-m",
+    :argument => GetoptLong::REQUIRED_ARGUMENT,
+    :note => "how many objects to create via create_many",
+    :argument_note => "NUMBER"
+  },
+  "--create-individual" => {
+    :short => "-i",
+    :argument => GetoptLong::REQUIRED_ARGUMENT,
+    :note => "how many objects to create via create",
+    :argument_note => "NUMBER"
+  },
+  "--new-individual" => {
+    :short => "-I",
+    :argument => GetoptLong::REQUIRED_ARGUMENT,
+    :note => "how many objects to create via new/save",
+    :argument_note => "NUMBER"
+  },
+  "--update-individual" => {
+    :short => "-u",
+    :argument => GetoptLong::REQUIRED_ARGUMENT,
+    :note => "how many objects to update indivudually",
+    :argument_note => "NUMBER"
+  },
+  "--update-many" => {
+    :short => "-U",
+    :argument => GetoptLong::REQUIRED_ARGUMENT,
+    :note => "how many objects to update via update_many",
+    :argument_note => "NUMBER"
+  },
+}
+
+command_line_options(@options) do |option,argument|
+  if option == '--cleanup'
+    $cleanup = true
+  elsif option == '--force'
+    $force = true
+  elsif option == '--create-many'
+    $create_many = argument.to_i
+  elsif option == '--create-individual'
+    $create_individual = argument.to_i
+  elsif option == '--new-individual'
+    $new_individual = argument.to_i
+  elsif option == '--update-individual'
+    $update_individual = argument.to_i
+  elsif option == '--update-many'
+    $update_many = argument.to_i
+  end
+end
+
+if $cleanup || $force
   ActiveRecord::Base.connection.drop_schema("awards_partitions", :cascade => true) rescue nil
   ActiveRecord::Base.connection.drop_table("awards") rescue nil
   ActiveRecord::Base.connection.drop_schema("employees_partitions", :cascade => true) rescue nil
   ActiveRecord::Base.connection.drop_table("employees") rescue nil
   ActiveRecord::Base.connection.drop_table("companies") rescue nil
-  exit(0) if ARGV[0] == '--cleanup'
+  exit(0) if $cleanup
 end
+
+$total_records = ($create_many + $create_individual + $new_individual) * 2
+
+puts "total records: #{$total_records}"
 
 START_DATE = Date.parse('2011-01-01')
 END_DATE = Date.parse('2011-12-31')
-NUM_EMPLOYEES = 5000
-NUM_AWARDS = NUM_EMPLOYEES / 10
 
 # the ActiveRecord classes
 
@@ -217,28 +293,137 @@ require File.expand_path(File.dirname(__FILE__) + "/lib/roman")
 
 # generates data for employees_partitions and employees tables
 
-(1..NUM_EMPLOYEES).each do |i|
+base = 0
+(1..$create_many).each do |i|
   employees << {
-    :name => "Winston J. Sillypants, #{to_roman(i)}",
+    :name => "Winston J. Sillypants, #{to_roman(base+i)}",
     :created_at => START_DATE + rand(END_DATE - START_DATE) + rand(1.day.seconds).seconds,
     :salary => rand(80000) + 60000,
     :company_id => company_ids[rand company_ids.length]
   }
 end
 
+puts "creating many employees #{$create_many}"
 Employee.create_many(employees)
+base += $create_many
+
+puts "creating individual employees #{$create_individual}"
+(1..$create_individual).each do |i|
+  employee_data = {
+    :name => "Jonathan Crabapple, #{to_roman(base+i)}",
+    :created_at => START_DATE + rand(END_DATE - START_DATE) + rand(1.day.seconds).seconds,
+    :salary => rand(80000) + 60000,
+    :company_id => company_ids[rand company_ids.length]
+  }
+  employees << Employee.create(employee_data)
+end
+base += $create_individual
+
+puts "new individual employees #{$new_individual}"
+(1..$new_individual).each do |i|
+  employee_data = {
+    :name => "Picholine Pimplenad, #{to_roman(base+i)}",
+    :created_at => START_DATE + rand(END_DATE - START_DATE) + rand(1.day.seconds).seconds,
+    :salary => rand(80000) + 60000,
+    :company_id => company_ids[rand company_ids.length]
+  }
+  employee = Employee.new(employee_data)
+  employee.save
+  employees << employee
+end
+base += $new_individual
+
+updates = {}
+puts "update many employees#{$update_many}"
+(1..$update_many).each do |i|
+  index = rand(employees.length)
+  employee_record = employees[index]
+  updates[{
+            :id => employee_record[:id],
+            :created_at => employee_record[:created_at]
+          }] = {
+    :salary => 100
+  }
+end
+
+Employee.update_many(updates, {:set_array => '"salary = #{table_name}.salary + datatable.salary, updated_at = now()"'})
+
+puts "update individual employees #{$update_individual}"
+(1..$update_individual).each do |i|
+  index = rand(employees.length)
+  employee_record = employees[index]
+  employee = Employee.from_partition(employee_record[:created_at]).find(employee_record[:id])
+  employee.salary += 1000
+  employee.save
+end
 
 # generates data for awards_partitions and awards tables
 
 awards = []
-(1..NUM_AWARDS).each do |i|
-  employee = Employee.find(rand(NUM_EMPLOYEES))
+
+base = 0
+(1..$create_many).each do |i|
+  employee_record = employees[rand(employees.length)]
   awards << {
-    :award_title => "You're the best #{to_roman(i)}",
-    :awarded_on => employee.created_at + rand(1.year.seconds).seconds,
-    :employee_created_at => employee.created_at,
-    :employee_id => employee.id
+    :award_title => "You're the best #{to_roman(base+i)}",
+    :awarded_on => employee_record[:created_at] + rand(1.year.seconds).seconds,
+    :employee_created_at => employee_record[:created_at],
+    :employee_id => employee_record[:id]
   }
 end
 
+puts "creating many awards #{$create_many}"
 Award.create_many(awards)
+base += $create_many
+
+puts "creating individual awards #{$create_individual}"
+(1..$create_individual).each do |i|
+  employee_record = employees[rand(employees.length)]
+  award_data = {
+    :award_title => "You're the best #{to_roman(base+i)}",
+    :awarded_on => employee_record[:created_at] + rand(1.year.seconds).seconds,
+    :employee_created_at => employee_record[:created_at],
+    :employee_id => employee_record[:id]
+  }
+  awards << Award.create(award_data)
+end
+base += $create_individual
+
+puts "new individual awards #{$new_individual}"
+(1..$new_individual).each do |i|
+  employee_record = employees[rand(employees.length)]
+  award_data = {
+    :award_title => "You're the best #{to_roman(base+i)}",
+    :awarded_on => employee_record[:created_at] + rand(1.year.seconds).seconds,
+    :employee_created_at => employee_record[:created_at],
+    :employee_id => employee_record[:id]
+  }
+  award = Award.new(award_data)
+  award.save
+  awards << award
+end
+
+base = 0
+updates = {}
+puts "update many awards #{$update_many}"
+(1..$update_many).each do |i|
+  award_record = awards[rand(awards.length)]
+  updates[{
+            :id => award_record[:id],
+            :employee_created_at => award_record[:employee_created_at]
+          }] = {
+    :award_title => "You're the greatest #{to_roman(base+i)}"
+  }
+end
+
+Award.update_many(updates, {:set_array => '"award_title = datatable.award_title, awarded_on = now()"'})
+base += $update_many
+
+puts "update individual #{$update_individual}"
+(1..$update_individual).each do |i|
+  award_record = awards[rand(awards.length)]
+  award = Award.from_partition(award_record[:employee_created_at]).find(award_record[:id])
+  award.awarded_on = Date.parse(Time.now.to_s)
+  award.award_title = "You're the greatest #{to_roman(base+i)}"
+  award.save
+end
