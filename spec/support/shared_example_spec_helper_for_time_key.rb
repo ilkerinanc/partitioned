@@ -1,15 +1,38 @@
-DATE_NOW = Date.parse(Time.now.to_s)
+DATE_NOW = Date.today
 
 shared_examples_for "check that basic operations with postgres works correctly for time key" do |class_name|
 
-  let!(:subject) { class_name }
+  let!(:subject) do
+    class_name.reset_column_information
+    class_name
+  end
+
+  context "when try to create one record" do
+
+    it "record created" do
+      lambda { subject.create(:name => 'Phil', :company_id => 3, :created_at => DATE_NOW + 1)
+      }.should_not raise_error
+    end
+
+  end # when try to create one record
+
+  context "when try to create one record using new/save" do
+
+    it "record created" do
+      lambda {
+        instance = subject.new(:name => 'Mike', :company_id => 1, :created_at => DATE_NOW + 1)
+        instance.save!
+      }.should_not raise_error
+    end
+
+  end # when try to create one record using new/save
 
   context "when try to create many records" do
 
     it "records created" do
       lambda { subject.create_many([
-                                     { :name => 'Alex', :company_id => 2 },
-                                     { :name => 'Aaron', :company_id => 3 }])
+                                     { :name => 'Alex', :company_id => 2, :created_at => DATE_NOW + 1 },
+                                     { :name => 'Aaron', :company_id => 3, :created_at => DATE_NOW + 1 }])
       }.should_not raise_error
     end
 
@@ -121,5 +144,4 @@ shared_examples_for "check that basic operations with postgres works correctly f
     end
 
   end # when try to find a record outside the range of partitions
-
 end # check that basic operations with postgres works correctly for time key

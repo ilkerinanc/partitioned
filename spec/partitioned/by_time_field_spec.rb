@@ -27,7 +27,7 @@ module Partitioned
       @employee = TimeField::Employee
       create_tables
       dates = @employee.partition_generate_range(DATE_NOW,
-                                                DATE_NOW + 1.day)
+                                                 DATE_NOW + 1.day)
       @employee.create_new_partition_tables(dates)
       ActiveRecord::Base.connection.execute <<-SQL
         insert into employees_partitions.

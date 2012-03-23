@@ -4,7 +4,7 @@ module Partitioned
   class PartitionedBase
     describe SqlAdapter do
 
-      before do
+      before(:all) do
         class SqlAdapter
           def last_n_partitions_order_by_clause
             return configurator.last_partitions_order_by_clause
@@ -42,6 +42,13 @@ module Partitioned
               company_id       integer not null
           );
         SQL
+      end
+
+      after(:all) do
+        ActiveRecord::Base.connection.execute <<-SQL
+          drop table employees;
+        SQL
+        Partitioned::PartitionedBase::Sql.send(:remove_const, :Employee)
       end
 
       let(:sql_adapter) { Sql::Employee::SqlAdapter.new( Sql::Employee) }

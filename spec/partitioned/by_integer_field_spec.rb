@@ -9,25 +9,25 @@ module Partitioned
     include TablesSpecHelper
 
     module IntegerField
-      class Employee < ByIntegerField
+      class Employee < Partitioned::ByIntegerField
         belongs_to :company, :class_name => 'Company'
 
         def self.partition_integer_field
-          return :id
+          return :integer_field
         end
 
         partitioned do |partition|
-          partition.foreign_key :company_id
+          partition.index :id, :unique => true
         end
       end # Employee
     end # IntegerField
 
     before(:all) do
-      @employee = IntegerField::Employee
       create_tables
-      @employee.create_new_partition_tables(Range.new(1, 3).step(@employee.partition_table_size))
+      @employee = IntegerField::Employee
+      @employee.create_new_partition_tables(Range.new(1, 4).step(@employee.partition_table_size))
       ActiveRecord::Base.connection.execute <<-SQL
-        insert into employees_partitions.p1 (company_id,name) values (1,'Keith');
+        insert into employees_partitions.p1 (integer_field,company_id,name) values (1,1,'Keith');
       SQL
     end
 
@@ -100,7 +100,7 @@ module Partitioned
       context "checks data in the on_field" do
 
         it "returns on_field" do
-          data.on_field.call(@employee).should == :id
+          data.on_field.call(@employee).should == :integer_field
         end
 
       end # checks data in the on_field
@@ -116,7 +116,7 @@ module Partitioned
       context "checks data in the check_constraint" do
 
         it "returns check_constraint" do
-          data.check_constraint.call(@employee, 1).should == "( id = 1 )"
+          data.check_constraint.call(@employee, 1).should == "( integer_field = 1 )"
         end
 
       end # checks data in the check_constraint
@@ -128,7 +128,7 @@ module Partitioned
         end
 
         it "returns check_constraint" do
-          data.check_constraint.call(@employee, 1).should == "( id >= 0 and id < 2 )"
+          data.check_constraint.call(@employee, 1).should == "( integer_field >= 0 and integer_field < 2 )"
         end
 
       end # checks data in the check_constraint, when partition_table_size != 1
