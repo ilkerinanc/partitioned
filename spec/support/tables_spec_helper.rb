@@ -28,7 +28,8 @@ module TablesSpecHelper
           updated_at       timestamp,
           name             text not null,
           salary           integer default 3,
-          company_id       integer not null
+          company_id       integer not null,
+          integer_field    integer not null default 1
       );
 
       create schema employees_partitions;

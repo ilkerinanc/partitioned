@@ -16,10 +16,6 @@ module Partitioned
           return :company_id
         end
 
-        def self.partition_integer_field
-          return :id
-        end
-
         partitioned do |partition|
           partition.foreign_key :company_id
         end

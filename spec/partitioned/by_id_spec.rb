@@ -13,7 +13,7 @@ module Partitioned
         belongs_to :company, :class_name => 'Company'
 
         def self.partition_table_size
-          return 2
+          return 1
         end
 
         partitioned do |partition|
@@ -25,9 +25,9 @@ module Partitioned
     before(:all) do
       @employee = Id::Employee
       create_tables
-      @employee.create_new_partition_tables(Range.new(0, 2).step(@employee.partition_table_size))
+      @employee.create_new_partition_tables(Range.new(1, 5).step(@employee.partition_table_size))
       ActiveRecord::Base.connection.execute <<-SQL
-        insert into employees_partitions.p0 (company_id,name) values (1,'Keith');
+        insert into employees_partitions.p1 (company_id,name) values (1,'Keith');
       SQL
     end
 
