@@ -54,10 +54,10 @@ module ActiveRecord
         #
         # PARTITIONED ADDITION.  prefetch_primary_key as requested by class.
         #
-        if !primary_key_value && @klass.respond_to?(:prefetch_primary_key?) && @klass.prefetch_primary_key?
-          primary_key_value = connection.next_sequence_value(klass.sequence_name)
-          values[klass.arel_table[klass.primary_key]] = primary_key_value
-        end
+#        if !primary_key_value && @klass.respond_to?(:prefetch_primary_key?) && @klass.prefetch_primary_key?
+#          primary_key_value = connection.next_sequence_value(klass.sequence_name)
+#          values[klass.arel_table[klass.primary_key]] = primary_key_value
+#        end
       end
 
       im = arel.create_insert
