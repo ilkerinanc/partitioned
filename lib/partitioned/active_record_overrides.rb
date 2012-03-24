@@ -25,7 +25,7 @@ module Partitioned
     #
     def delete
       if persisted?
-        self.class.from_partition(id).delete(id)
+        self.class.from_partition(*self.class.partition_key_values(attributes)).delete(id)
       end
       @destroyed = true
       freeze
