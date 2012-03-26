@@ -85,5 +85,28 @@ module Partitioned
       end # checks data in the base_name
     end # partitioned block
 
+    context "#partition_key_values" do
+
+      before do
+        class_partitioned_base.stub!(:partition_keys).and_return([:id])
+      end
+
+      context "call method with key that represented as a string" do
+
+        it "returns values" do
+          class_partitioned_base.partition_key_values( "id" => 1 ).should == [1]
+        end
+
+      end # call method with key that represented as a string
+
+      context "call method with key that represented as a symbol" do
+
+        it "returns values" do
+          class_partitioned_base.partition_key_values( :id => 2 ).should == [2]
+        end
+
+      end # call method with key that represented as a symbol
+    end # #partition_key_values
+
   end # PartitionedBase
 end # Partitioned

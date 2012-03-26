@@ -107,10 +107,29 @@
 #  Each of partitions inherits from employees table,
 #  thus a new row will automatically be added to the employees table .
 #
-#  To add data, we use the following construction,
-#  in which employees - a random data:
+#  To add data, we use the following constructions,
+#  in which employees and employee_data - a random data:
 #
+#  create_many - allows you to add multiple records
 #  Employee.create_many(employees)
+#  create - allows you to add one record
+#  Employee.create(employee_data)
+#  new/save! - allows you to add one record without using "create" method
+#  employee = Employee.new(employee_data)
+#  employee.save!
+#
+#  For update data, we use the following constructions,
+#  in which updates - a random data:
+#
+#  update_many - allows you to update multiple records.
+#  :set_array - additional option, you may read the description
+#  of the method in the file update_many bulk_methods_mixin.rb about this option.
+#  Employee.update_many(updates, { :set_array => '"salary = #{table_name}.salary +
+#                                   datatable.salary, updated_at = now()"' })
+#
+#  This construction using for update one record. You also may use update method.
+#  employee = Employee.from_partition(employee_record[:company_id]).find(employee_record[:id])
+#  employee.save
 #
 #  The data get into the employees table ONLY through partition tables.
 #  You can not do an insert row into a table employees directly.
@@ -129,63 +148,65 @@
 #
 #  Table employees with random data from 1 to 5000:
 #
-#   id |         created_at         | updated_at |            name                     | salary | company_id
-#  ----+----------------------------+------------+-------------------------------------+--------+------------
-#    1 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, I            | 183.00 |     2
-#    2 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, II           | 145.00 |     1
-#    3 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, III          | 229.00 |     3
-#   ...
-# 4998 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVIII | 456.00 |     4
-# 4999 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCIX   | 751.00 |     3
-# 5000 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, _V           | 356.00 |     2
+#  id  |         created_at         |         updated_at         |               name                  |   salary    | company_id
+#------+----------------------------+----------------------------+-------------------------------------+-------------+------------
+#    1 | 2012-03-26 11:26:30.704959 | 2012-03-26 11:26:45.519874 | Winston J. Sillypants, I            | $106,363.00 |     4
+#    2 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, II           | $103,767.00 |     3
+#    3 | 2012-03-26 11:26:30.704959 | 2012-03-26 11:26:43.250032 | Winston J. Sillypants, III          | $128,998.00 |     1
+#  ...
+# 4998 | 2012-03-26 11:26:40.43347  | 2012-03-26 11:26:44.570338 | Picholine Pimplenad, MMMMCMXCVIII   |  $93,628.00 |     3
+# 4999 | 2012-03-26 11:26:40.437824 | 2012-03-26 11:26:40.437824 | Picholine Pimplenad, MMMMCMXCIX     | $133,964.00 |     3
+# 5000 | 2012-03-26 11:26:40.441958 | 2012-03-26 11:26:40.441958 | Picholine Pimplenad, _V             |  $76,519.00 |     4
 #
 #  Partition employees_partitions.p1 - partition where company_id = 1:
 #
-#   id |         created_at         | updated_at |            name                     | salary | company_id
-#  ----+----------------------------+------------+-------------------------------------+--------+------------
-#    2 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, II           | 145.00 |     1
-#    8 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, XIII         | 307.00 |     1
-#   12 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, XVII         | 812.00 |     1
-#   ...
-# 4986 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXXVI | 65.00  |     1
-# 4995 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCV    | 316.00 |     1
-# 4997 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVII  | 119.00 |     1
+#  id  |         created_at         |         updated_at         |                name                 |   salary    | company_id
+#------+----------------------------+----------------------------+-------------------------------------+-------------+------------
+#    3 | 2012-03-26 11:26:30.704959 | 2012-03-26 11:26:43.250032 | Winston J. Sillypants, III          | $128,998.00 |     1
+#    5 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, V            | $134,319.00 |     1
+#    8 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, VIII         |  $82,995.00 |     1
+#  ...
+# 4988 | 2012-03-26 11:26:40.392319 | 2012-03-26 11:26:44.077802 | Picholine Pimplenad, MMMMCMLXXXVIII | $132,535.00 |     1
+# 4994 | 2012-03-26 11:26:40.416951 | 2012-03-26 11:26:40.416951 | Picholine Pimplenad, MMMMCMXCIV     | $105,119.00 |     1
+# 4996 | 2012-03-26 11:26:40.425268 | 2012-03-26 11:26:40.425268 | Picholine Pimplenad, MMMMCMXCVI     |  $81,403.00 |     1
 #
 #  Partition employees_partitions.p2 - partition where company_id = 2:
 #
-#   id |         created_at         | updated_at |            name                     | salary | company_id
-#  ----+----------------------------+------------+-------------------------------------+--------+------------
-#    1 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, I            | 183.00 |     2
-#    9 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, IX           | 840.00 |     2
-#   11 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, XI           | 943.00 |     2
-#   ...
-# 4994 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCIV   | 712.00 |     2
-# 4996 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVI   | 127.00 |     2
-# 5000 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, _V           | 356.00 |     2
+#  id  |         created_at         |         updated_at         |              name                   |   salary    | company_id
+#------+----------------------------+----------------------------+-------------------------------------+-------------+------------
+#    4 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, IV           | $136,540.00 |     2
+#   12 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, XII          | $103,200.00 |     2
+#   13 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, XIII         | $139,077.00 |     2
+#  ...
+# 4991 | 2012-03-26 11:26:40.40451  | 2012-03-26 11:26:42.057637 | Picholine Pimplenad, MMMMCMXCI      | $122,115.00 |     2
+# 4992 | 2012-03-26 11:26:40.408519 | 2012-03-26 11:26:40.408519 | Picholine Pimplenad, MMMMCMXCII     |  $90,176.00 |     2
+# 4995 | 2012-03-26 11:26:40.421126 | 2012-03-26 12:26:49.969993 | Picholine Pimplenad, MMMMCMXCV      |  $86,410.00 |     2
+#
 #
 #  Partition employees_partitions.p3 - partition where company_id = 3:
 #
-#   id |         created_at         | updated_at |            name                     | salary | company_id
-#  ----+----------------------------+------------+-------------------------------------+--------+------------
-#    3 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, III          |  229.00 |    3
-#    4 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, IV           |  475.00 |    3
-#    6 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, VI           |  997.00 |    3
-#   ...
-# 4974 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXIV  |  405.00 |    3
-# 4982 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXXII |  497.00 |    3
-# 4999 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCIX   |  751.00 |    3
+#  id  |         created_at         |         updated_at         |               name                  |   salary    | company_id
+#------+----------------------------+----------------------------+-------------------------------------+-------------+------------
+#    2 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, II           | $103,767.00 |     3
+#    6 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, VI           |  $67,280.00 |     3
+#    9 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, IX           |  $75,396.00 |     3
+#  ...
+# 4990 | 2012-03-26 11:26:40.400746 | 2012-03-26 11:26:43.604349 | Picholine Pimplenad, MMMMCMXC       |  $95,882.00 |     3
+# 4998 | 2012-03-26 11:26:40.43347  | 2012-03-26 11:26:44.570338 | Picholine Pimplenad, MMMMCMXCVIII   |  $93,628.00 |     3
+# 4999 | 2012-03-26 11:26:40.437824 | 2012-03-26 11:26:40.437824 | Picholine Pimplenad, MMMMCMXCIX     | $133,964.00 |     3
+#
 #
 #  Partition employees_partitions.p4 - partition where company_id = 4:
 #
-#   id |         created_at         | updated_at |            name                     | salary | company_id
-#  ----+----------------------------+------------+-------------------------------------+--------+------------
-#    5 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, V            | 609.00 |     4
-#    7 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, VII          | 348.00 |     4
-#   10 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, X            | 744.00 |     4
-#   ...
-# 4989 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMLXXXIX | 224.00 |     4
-# 4991 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCI    | 728.00 |     4
-# 4998 | 2012-03-11 13:26:52.811381 |            | Winston J. Sillypants, MMMMCMXCVIII | 456.00 |     4
+#  id  |         created_at         |         updated_at         |               name                  |   salary    | company_id
+#------+----------------------------+----------------------------+-------------------------------------+-------------+------------
+#    1 | 2012-03-26 11:26:30.704959 | 2012-03-26 11:26:45.519874 | Winston J. Sillypants, I            | $106,363.00 |     4
+#    7 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, VII          | $111,585.00 |     4
+#   17 | 2012-03-26 11:26:30.704959 |                            | Winston J. Sillypants, XVII         | $135,812.00 |     4
+#  ...
+# 4993 | 2012-03-26 11:26:40.412815 | 2012-03-26 11:26:40.412815 | Picholine Pimplenad, MMMMCMXCIII    |  $95,851.00 |     4
+# 4997 | 2012-03-26 11:26:40.429356 | 2012-03-26 11:26:40.429356 | Picholine Pimplenad, MMMMCMXCVII    |  $84,564.00 |     4
+# 5000 | 2012-03-26 11:26:40.441958 | 2012-03-26 11:26:40.441958 | Picholine Pimplenad, _V             |  $76,519.00 |     4
 #
 
 require File.expand_path(File.dirname(__FILE__) + "/lib/command_line_tool_mixin")
