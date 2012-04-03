@@ -1,6 +1,6 @@
-#!/usr/bin/env ../../../../script/rails runner
+#!/usr/bin/env ../spec/dummy/script/rails runner
 # if you use linux, please change previous line to the
-# "#!../../../../script/rails runner"
+# "#! ../spec/dummy/script/rails runner"
 
 # Initial data:
 #
@@ -417,6 +417,7 @@ require File.expand_path(File.dirname(__FILE__) + "/lib/company")
 
 class Employee < Partitioned::ByCreatedAt
   belongs_to :company, :class_name => 'Company'
+  attr_accessible :name, :company_id, :salary, :created_at
 
   partitioned do |partition|
     partition.index :id, :unique => true

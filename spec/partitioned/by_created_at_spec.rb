@@ -11,6 +11,7 @@ module Partitioned
     module CreatedAt
       class Employee < Partitioned::ByCreatedAt
         belongs_to :company, :class_name => 'Company'
+        attr_accessible :company_id, :name, :created_at
 
         partitioned do |partition|
           partition.index :id, :unique => true

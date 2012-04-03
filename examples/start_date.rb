@@ -1,6 +1,6 @@
-#!/usr/bin/env ../../../../script/rails runner
+#!/usr/bin/env ../spec/dummy/script/rails runner
 # if you use linux, please change previous line to the
-# "#!../../../../script/rails runner"
+# "#! ../spec/dummy/script/rails runner"
 
 # Initial data:
 #
@@ -486,6 +486,7 @@ end
 
 class Employee < Partitioned::ByStartDate
   belongs_to :company, :class_name => 'Company'
+  attr_accessible :company_id, :start_date, :salary, :name
 
   partitioned do |partition|
     partition.index :id, :unique => true

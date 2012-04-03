@@ -11,6 +11,7 @@ module Partitioned
     module ForeignKey
       class Employee < ByForeignKey
         belongs_to :company, :class_name => 'Company'
+        attr_accessible :name, :integer_field, :company_id
 
         def self.partition_foreign_key
           return :company_id

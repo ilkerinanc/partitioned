@@ -1,6 +1,6 @@
-#!/usr/bin/env ../../../../script/rails runner
+#!/usr/bin/env ../spec/dummy/script/rails runner
 # if you use linux, please change previous line to the
-# "#!../../../../script/rails runner"
+# "#! ../spec/dummy/script/rails runner"
 
 # Initial data:
 #
@@ -660,6 +660,7 @@ require File.expand_path(File.dirname(__FILE__) + "/lib/company")
 
 class Employee < Partitioned::ByCreatedAt
   belongs_to :company, :class_name => 'Company'
+  attr_accessible :created_at, :salary, :name, :company_id
 
   partitioned do |partition|
     partition.index :id, :unique => true
@@ -689,6 +690,7 @@ end
 
 class Award < ByEmployeeCreatedAt
   belongs_to :employee, :class_name => 'Employee'
+  attr_accessible :award_title, :employee_created_at, :employee_id, :awarded_on
 
   partitioned do |partition|
     partition.foreign_key lambda {|model, *partition_key_values|
@@ -895,7 +897,7 @@ end
 base += $new_individual
 
 updates = {}
-puts "update many employees#{$update_many}"
+puts "update many employees #{$update_many}"
 (1..$update_many).each do |i|
   index = rand(employees.length)
   employee_record = employees[index]

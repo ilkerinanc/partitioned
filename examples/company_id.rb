@@ -1,6 +1,6 @@
-#!/usr/bin/env ../../../../script/rails runner
+#!/usr/bin/env ../spec/dummy/script/rails runner
 # if you use linux, please change previous line to the
-# "#!../../../../script/rails runner"
+# "#! ../spec/dummy/script/rails runner"
 
 # Initial data:
 #
@@ -301,6 +301,7 @@ require File.expand_path(File.dirname(__FILE__) + "/lib/by_company_id")
 
 class Employee < ByCompanyId
   belongs_to :company, :class_name => 'Company'
+  attr_accessible :salary, :company_id, :name
 
   connection.execute <<-SQL
     create table employees

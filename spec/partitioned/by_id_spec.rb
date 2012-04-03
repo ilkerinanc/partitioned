@@ -11,6 +11,7 @@ module Partitioned
     module Id
       class Employee < ById
         belongs_to :company, :class_name => 'Company'
+        attr_accessible :company_id, :name, :integer_field
 
         def self.partition_table_size
           return 1

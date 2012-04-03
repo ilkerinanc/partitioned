@@ -1,6 +1,7 @@
-#!/usr/bin/env ../../../../script/rails runner
+#!/usr/bin/env ../spec/dummy/script/rails runner
 # if you use linux, please change previous line to the
-# "#!../../../../script/rails runner"
+# "#! ../spec/dummy/script/rails runner"
+
 # Initial data:
 #
 #  Companies table is completed by four companies:
@@ -350,6 +351,7 @@ require File.expand_path(File.dirname(__FILE__) + "/lib/company")
 
 class Employee < Partitioned::ById
   belongs_to :company, :class_name => 'Company'
+  attr_accessible :company_id, :salary, :name
 
   def self.partition_table_size
     return $partition_table_size
