@@ -16,6 +16,6 @@ Gem::Specification.new do |s|
  s.require_path = 'lib'
  s.homepage    = 'http://www.fiksu.com'
  s.add_dependency('pg')
- s.add_dependency "rails", "~> 3.1.0"
+ s.add_dependency "rails"
  s.add_dependency('rspec-rails')
 end
