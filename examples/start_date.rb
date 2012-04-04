@@ -2,6 +2,14 @@
 # if you use linux, please change previous line to the
 # "#! ../spec/dummy/script/rails runner"
 
+# Before running this example you should execute "bundle install" and "rake db:create".
+# To run this example you should open 'example' directory and execute example with one of the following flags:
+# -C    cleanup data in database and exit;
+# -F    cleanup data in database before creating new data;
+#
+# For example:
+# ./start_date.rb - F
+
 # Initial data:
 #
 #  Companies table is completed by four companies:
