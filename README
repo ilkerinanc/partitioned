@@ -34,7 +34,21 @@ Given the following models:
   class Company < ActiveRecord::Base
   end
 
-  class Employee < Partitioned::ByCompanyId
+  class ByCompanyId < Partitioned::ByForeignKey
+    self.abstract_class = true
+
+    belongs_to :company
+
+    def self.partition_foreign_key
+      return :company_id
+    end
+
+    partitioned do |partition|
+      partition.index :id, :unique => true
+    end
+  end
+
+  class Employee < ByCompanyId
   end
 
 and the following tables:
