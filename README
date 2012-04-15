@@ -62,6 +62,10 @@ and the following tables:
       name             text null
   );
 
+  -- add some companies
+  insert into table companies (name) values
+    ('company 1'),('company 2'),('company 2');
+
   -- this is the parent table
   create table employees
   (
@@ -72,12 +76,27 @@ and the following tables:
       company_id       integer not null references companies
   );
 
+We now need to create some infrastructure for partitioned tables,
+in particular, we create a schema to hold the child partition
+tables of employees.
+
+  Employee.create_infrastructure
+
+Which creates the employees_partitions schema using the following SQL:
+
   create schema employees_partitions;
 
-  create table companies (name) values
-    ('company 1'),('company 2'),('company 2');
+NOTE: We also install protections on the employees table so it isn't
+used as a data table (this SQL is not presented for simplicity but is
+apart of the create_infrastructure call).
 
-  -- some children
+To add child tables we use the create_new_partitions_tables method:
+
+  company_ids = Company.all.map(&:id)
+  Employee.create_new_partition_tables(company_ids)
+
+which results in the following SQL:
+
   create table employees_partitions.p1
     ( CHECK ( company_id = 1 ) ) INHERITS (employees);
   create table employees_partitions.p2
@@ -85,7 +104,14 @@ and the following tables:
   create table employees_partitions.p3
     ( CHECK ( company_id = 3 ) ) INHERITS (employees);
 
-since database records exist in a specific child table dependant on
+NOTE: Some other SQL is generated in the above example, specifically
+the reference to the companies table needs to be explicitly created
+for postgres child tables AND the unique index on 'id' is created.
+These are not shown for simplicity.
+
+Now we can do operations involving the child partitions.
+
+Since database records exist in a specific child table dependant on
 the field "company_id" we need to have creates that turn into database
 inserts of the EMPLOYEES table redirect the record insert into the
 specific child table determined by the value of COMPANY_ID

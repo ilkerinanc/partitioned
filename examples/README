@@ -3,14 +3,21 @@ These rails scripts will create and populate partitioned tables. The
 scripts accept the following parameters:
 
  --?                   list available options
- --force	       delete used tables before starting
- --cleanup	       delete used tables and exit
+ --force	       delete tables before starting
+                         default: false
+ --cleanup	       delete tables and exit
+                         default: false
  --create-many         how many objects to create via create_many
+                         default: 3000
  --create-individual   how many objects to create via create
+                         default: 1000
  --new-individual      how many objects to create via new.save
+                         default: 1000
  --update-individual   how many objects to update individually
+                         default: 1000
  --update-many         how many objects to update via update_many
-  
+                         default: 1000
+
 The scripts are:
 
 company_id.rb: table 'employees' partitioned by company_id
