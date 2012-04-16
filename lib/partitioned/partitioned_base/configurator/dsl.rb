@@ -36,9 +36,10 @@ module Partitioned
       #   end
       #
       #   partitioned do |partition|
-      #     partition.on lambda{|model| return model.partition_time_field}
+      #     partition.on lambda{ |model| return model.partition_time_field}
       #     partition.constraint lambda{|model,time_field_value|
-      #                                 return "#{model.partition_time_field} >= '#{time_field_value.strftime}' and #{model.partition_time_field} < '#{(time_field_value + 1.day).strftime}'"
+      #                                 return "#{model.partition_time_field} >= '#{time_field_value.strftime}'
+      #                                 and #{model.partition_time_field} < '#{(time_field_value + 1.day).strftime}'"
       #                                }
       #   end
       # end
@@ -254,7 +255,8 @@ module Partitioned
           if referencing_field.is_a? Proc
             data.foreign_keys << referencing_field
           else
-            data.foreign_keys << Partitioned::PartitionedBase::Configurator::Data::ForeignKey.new(referencing_field, referenced_table, referenced_field)
+            data.foreign_keys << Partitioned::PartitionedBase::Configurator::Data::ForeignKey.
+                                    new(referencing_field, referenced_table, referenced_field)
           end
         end
 

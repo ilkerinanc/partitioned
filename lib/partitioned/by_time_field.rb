@@ -1,15 +1,15 @@
 module Partitioned
   #
-  # partition tables by a time field grouping them by day
+  # Partition tables by a time field grouping them by day.
   #
   class ByTimeField < PartitionedBase
     self.abstract_class = true
 
     #
-    # generate an enumerable that represents all the dates between
-    # start_date and end_date skipping step
+    # Generate an enumerable that represents all the dates between
+    # start_date and end_date skipping step.
     #
-    # this can be used to calls that take an enumerable like create_infrastructure
+    # This can be used to calls that take an enumerable like create_infrastructure.
     #
     def self.partition_generate_range(start_date, end_date, step = :default)
       step = partition_table_size if step == :default
@@ -23,22 +23,22 @@ module Partitioned
     end
 
     #
-    # normalize the value to the current day
+    # Normalize the value to the current day.
     #
     def self.partition_normalize_key_value(time_value)
       return time_value.to_date
     end
 
     #
-    # the size of the partition, 1.day
+    # The size of the partition, 1.day
     #
     def self.partition_table_size
       return 1.day
     end
 
     #
-    # abstract -- implement in a derived clas.
-    # the name of the time-related field we will use to partition child tables
+    # Abstract -- implement in a derived class.
+    # The name of the time-related field we will use to partition child tables.
     #
     def self.partition_time_field
       raise MethodNotImplemented.new(self, :partition_time_field)

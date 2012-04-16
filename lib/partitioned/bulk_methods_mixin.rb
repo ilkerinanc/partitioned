@@ -18,34 +18,28 @@ module Partitioned
     #   :check_consistency = true
     #
     # examples:
-    #  first example didn't uses more options.
+    #  first example did not uses more options.
     #
-    # rows = [{
-    #   :name => 'Keith',
-    #   :salary => 1000,
-    # },
-    # {
-    #   :name => 'Alex',
-    #   :salary => 2000,
-    # }]
+    # rows = [
+    #         { :name => 'Keith',
+    #           :salary => 1000 },
+    #         { :name => 'Alex',
+    #           :salary => 2000 }
+    #        ]
     #
     # Employee.create_many(rows)
     #
     #  this second example uses :returning option
     #  to returns key values
     #
-    # rows = [{
-    #   :name => 'Keith',
-    #   :salary => 1000,
-    # },
-    # {
-    #   :name => 'Alex',
-    #   :salary => 2000,
-    # }]
+    # rows = [
+    #         { :name => 'Keith',
+    #           :salary => 1000 },
+    #         { :name => 'Alex',
+    #           :salary => 2000 }
+    #        ]
     #
-    # options = {
-    #   :returning => [:id]
-    # }
+    # options = { :returning => [:id] }
     #
     # Employee.create_many(rows, options) returns [#<Employee id: 1>, #<Employee id: 2>]
     #
@@ -53,22 +47,16 @@ module Partitioned
     #  Slice_size - is an integer that specifies how many
     #  records will be created in a single SQL query.
     #
-    # rows = [{
-    #   :name => 'Keith',
-    #   :salary => 1000,
-    # },
-    # {
-    #   :name => 'Alex',
-    #   :salary => 2000,
-    # },
-    # {
-    #   :name => 'Mark',
-    #   :salary => 3000,
-    # }]
+    # rows = [
+    #         { :name => 'Keith',
+    #           :salary => 1000 },
+    #         { :name => 'Alex',
+    #           :salary => 2000 },
+    #         { :name => 'Mark',
+    #           :salary => 3000 }
+    #        ]
     #
-    # options = {
-    #   :slice_size => 2
-    # }
+    # options = { :slice_size => 2 }
     #
     # Employee.create_many(rows, options) will generate two insert queries
     #
@@ -142,47 +130,35 @@ module Partitioned
     #  this first example uses "set_array" to add the value of "salary"
     #  to the specific employee's salary
     #  the default where clause is to match IDs so, it works here.
-    # rows = [{
-    #   :id => 1,
-    #   :salary => 1000,
-    # },
-    # {
-    #   :id => 10,
-    #   :salary => 2000,
-    # },
-    # {
-    #   :id => 23,
-    #   :salary => 2500,
-    # }]
+    # rows = [
+    #         { :id => 1,
+    #           :salary => 1000 },
+    #         { :id => 10,
+    #           :salary => 2000 },
+    #         { :id => 23,
+    #           :salary => 2500 }
+    #        ]
     #
-    # options = {
-    #   :set_array => '"salary = datatable.salary"'
-    # }
+    # options = { :set_array => '"salary = datatable.salary"' }
     #
     # Employee.update_many(rows, options)
     #
     #
     #  this versions sets the where clause to match Salaries.
-    # rows = [{
-    #   :id => 1,
-    #   :salary => 1000,
-    #   :company_id => 10
-    # },
-    # {
-    #   :id => 10,
-    #   :salary => 2000,
-    #   :company_id => 12
-    # },
-    # {
-    #   :id => 23,
-    #   :salary => 2500,
-    #   :company_id => 5
-    # }]
+    # rows = [
+    #         { :id => 1,
+    #           :salary => 1000,
+    #           :company_id => 10 },
+    #         { :id => 10,
+    #           :salary => 2000,
+    #           :company_id => 12 },
+    #         { :id => 23,
+    #           :salary => 2500,
+    #           :company_id => 5 }
+    #        ]
     #
-    # options = {
-    #   :set_array => '"company_id = datatable.company_id"',
-    #   :where => '"#{table_name}.salary = datatable.salary"'
-    # }
+    # options = { :set_array => '"company_id = datatable.company_id"',
+    #             :where => '"#{table_name}.salary = datatable.salary"' }
     #
     # Employee.update_many(rows, options)
     #

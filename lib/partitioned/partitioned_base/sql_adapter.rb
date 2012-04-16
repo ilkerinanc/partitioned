@@ -12,7 +12,7 @@ module Partitioned
       end
 
       #
-      # ensure our function for warning about improper partition usage is in place
+      # Ensure our function for warning about improper partition usage is in place.
       #
       # Name: always_fail_on_insert(text); Type: FUNCTION; Schema: public
       #
@@ -43,7 +43,7 @@ module Partitioned
       end
 
       #
-      # does a specific child partition exist
+      # Does a specific child partition exist.
       #
       def partition_exists?(*partition_key_values)
         return find(:first,
@@ -56,22 +56,22 @@ module Partitioned
       end
 
       #
-      # returns an array of partition table names from last to first limited to
+      # Returns an array of partition table names from last to first limited to
       # the number of entries requested by its first parameter.
       #
-      # the magic here is in the overridden method "last_n_partitions_order_by_clause"
+      # The magic here is in the overridden method "last_n_partitions_order_by_clause"
       # which is designed to order a list of partition table names (table names without
       # their schema name) from last to first.
       #
-      # if the child table names are the format "pYYYYMMDD" where YYYY is a four digit year, MM is
+      # If the child table names are the format "pYYYYMMDD" where YYYY is a four digit year, MM is
       # a month number and DD is a day number, you would use the following to order from last to
       # first:
       #   tablename desc
       #
-      # for child table names of the format "pXXXX" where XXXX is a number, you may want something like:
+      # For child table names of the format "pXXXX" where XXXX is a number, you may want something like:
       #   substring(tablename, 2)::integer desc
       #
-      # for clarity, the sql executed is:
+      # For clarity, the sql executed is:
       #    select tablename from pg_tables where schemaname = $1 order by $2 limit $3
       # where:
       #  $1 = the name of schema (foos_partitions)
@@ -88,18 +88,18 @@ module Partitioned
       end
 
       #
-      # override this or order the tables from last (greatest value? greatest date?) to first
+      # Override this or order the tables from last (greatest value? greatest date?) to first.
       #
       def last_n_partitions_order_by_clause
         return configurator.last_n_partitions_order_by_clause
       end
 
       #
-      # used to create the parent table rule to ensure
+      # Used to create the parent table rule to ensure.
       #
-      # this will cause an error on attempt to insert into the parent table
+      # This will cause an error on attempt to insert into the parent table.
       #
-      # we want all records to exist in one of the child tables so the
+      # We want all records to exist in one of the child tables so the
       # query planner can optimize access to the records.
       #
       def add_parent_table_rules(*partition_key_values)
@@ -118,14 +118,14 @@ module Partitioned
       end
 
       #
-      # the name of the table (schemaname.childtablename) given the check constraint values.
+      # The name of the table (schemaname.childtablename) given the check constraint values.
       #
       def partition_table_name(*partition_key_values)
         return configurator.table_name(*partition_key_values)
       end
 
       #
-      # create a single child table.
+      # Create a single child table.
       #
       def create_partition_table(*partition_key_values)
         create_table(configurator.table_name(*partition_key_values), {
@@ -137,14 +137,14 @@ module Partitioned
       end
 
       #
-      # remove a specific single child table
+      # Remove a specific single child table.
       #
       def drop_partition_table(*partition_key_values)
         drop_table(configurator.table_name(*partition_key_values))
       end
 
       #
-      # add indexes that must exist on child tables.  Only leaf child tables
+      # Add indexes that must exist on child tables. Only leaf child tables
       # need indexes as parent table indexes are not used in postgres.
       #
       def add_partition_table_index(*partition_key_values)
@@ -159,31 +159,31 @@ module Partitioned
       end
 
       #
-      # used when creating the name of a SQL rule
+      # Used when creating the name of a SQL rule.
       #
       def parent_table_rule_name(name, suffix = "rule", *partition_key_values)
         return "#{configurator.parent_table_name(*partition_key_values).gsub(/[.]/, '_')}_#{name}_#{suffix}"
       end
 
       #
-      # used to create index names
+      # Used to create index names.
       #
       def index_name(name, *partition_key_values)
         return "#{configurator.part_name(*partition_key_values)}_#{name}_idx"
       end
 
       #
-      # used to create index names
+      # Used to create index names.
       #
       def unique_index_name(name, *partition_key_values)
         return "#{configurator.part_name(*partition_key_values)}_#{name}_udx"
       end
 
       #
-      # this is here for derived classes to set up references to added columns
+      # This is here for derived classes to set up references to added columns
       # (or columns in the parent that need foreign key constraints).
       #
-      # foreign keys are not inherited in postgres.  So, a parent table
+      # Foreign keys are not inherited in postgres. So, a parent table
       # of the form:
       #
       #   -- this is the referenced table
@@ -211,12 +211,12 @@ module Partitioned
       #   create table employees_of_company_2 ( CHECK ( company_id = 2 ) ) INHERITS (employees);
       #   create table employees_of_company_3 ( CHECK ( company_id = 3 ) ) INHERITS (employees);
       #
-      # since postgres does not inherit referential integrity from parent tables, the following
+      # Since postgres does not inherit referential integrity from parent tables, the following
       # insert will work:
       #    insert into employees_of_company_1 (name, company_id, supervisor_id) values ('joe', 1, 10);
       # even if there is no record in companies with id = 1 and there is no record in employees with id = 10
       #
-      # for proper referential integrity handling you must do the following:
+      # For proper referential integrity handling you must do the following:
       #   ALTER TABLE employees_of_company_1 add foreign key (company_id) references companies(id)
       #   ALTER TABLE employees_of_company_2 add foreign key (company_id) references companies(id)
       #   ALTER TABLE employees_of_company_3 add foreign key (company_id) references companies(id)
@@ -225,7 +225,7 @@ module Partitioned
       #   ALTER TABLE employees_of_company_2 add foreign key (supervisor_id) references employees_of_company_2(id)
       #   ALTER TABLE employees_of_company_3 add foreign key (supervisor_id) references employees_of_company_3(id)
       #
-      # the second set of alter tables brings up a good another consideration about postgres references and partitions.
+      # The second set of alter tables brings up a good another consideration about postgres references and partitions.
       # postgres will not follow references to a child table.  So, a foreign key reference to "employees" in this
       # set of alter statements would not work because postgres would expect the table "employees" to have
       # the specific referenced record, but the record really exists in a child of employees.  So, the alter statement

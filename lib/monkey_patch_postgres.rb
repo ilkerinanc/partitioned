@@ -11,7 +11,7 @@ module ActiveRecord::ConnectionAdapters
 
   class PostgreSQLAdapter < AbstractAdapter
     #
-    # get the next value in a sequence.  used on INSERT operation for
+    # Get the next value in a sequence. Used on INSERT operation for
     # partitioning like by_id because the ID is required before the insert
     # so that the specific child table is known ahead of time.
     #
@@ -20,8 +20,8 @@ module ActiveRecord::ConnectionAdapters
     end
 
     #
-    # get the some next values in a sequence.
-    # batch_size - count of values
+    # Get the some next values in a sequence.
+    # batch_size - count of values.
     #
     def next_sequence_values(sequence_name, batch_size)
       result = execute("select nextval('#{sequence_name}') from generate_series(1, #{batch_size})")
@@ -29,8 +29,8 @@ module ActiveRecord::ConnectionAdapters
     end
 
     #
-    # causes active resource to fetch the primary key for the table (using next_sequence_value())
-    # just before an insert.  We need the prefetch to happen but we don't have enough information
+    # Causes active resource to fetch the primary key for the table (using next_sequence_value())
+    # just before an insert. We need the prefetch to happen but we don't have enough information
     # here to determine if it should happen, so Relation::insert has been modified to request of
     # the ActiveRecord::Base derived class if it requires a prefetch.
     #
@@ -39,7 +39,7 @@ module ActiveRecord::ConnectionAdapters
     end
 
     #
-    # creates a schema given a name.
+    # Creates a schema given a name.
     # options:
     #   :unless_exists - check if schema exists.
     #
@@ -51,7 +51,7 @@ module ActiveRecord::ConnectionAdapters
     end
 
     #
-    # drop a schema given a name.
+    # Drop a schema given a name.
     # options:
     #   :if_exists - check if schema exists.
     #   :cascade - cascade drop to dependant objects
@@ -64,7 +64,7 @@ module ActiveRecord::ConnectionAdapters
     end
 
     #
-    # add foreign key constraint to table.
+    # Add foreign key constraint to table.
     #
     def add_foreign_key(referencing_table_name, referencing_field_name, referenced_table_name, referenced_field_name = :id)
       execute("ALTER TABLE #{referencing_table_name} add foreign key (#{referencing_field_name}) references #{referenced_table_name}(#{referenced_field_name})")

@@ -13,7 +13,7 @@ module Partitioned
       end
 
       #
-      # drop partitions that are no longer necessary.
+      # Drop partitions that are no longer necessary.
       # uses #old_partition_key_values_set as the list of
       # partitions to remove.
       #
@@ -24,7 +24,7 @@ module Partitioned
       end
 
       #
-      # create partitions that are needed (probably to handle data that
+      # Create partitions that are needed (probably to handle data that
       # will be inserted into the database within the next few weeks).
       # uses #new_partition_key_value_set to determine the key values
       # for the specific child tables to create.
@@ -36,7 +36,7 @@ module Partitioned
       end
 
       #
-      # create any partition tables from a list.  the partition tables must
+      # Create any partition tables from a list.  the partition tables must
       # not already exist and its schema must already exist.
       #
       def create_new_partition_tables(enumerable)
@@ -46,7 +46,7 @@ module Partitioned
       end
 
       #
-      # the once called function to prepare a parent table for partitioning as well
+      # The once called function to prepare a parent table for partitioning as well
       # as create the schema that the child tables will be placed in.
       #
       def create_infrastructure
@@ -56,41 +56,41 @@ module Partitioned
 
       protected
       #
-      # an array of key values (each key value is an array of keys) that represent
+      # An array of key values (each key value is an array of keys) that represent
       # the child partitions that should be created.
       #
-      # used by #create_new_partitions and generally called once a day to update
-      # the database with new soon-to-be needed child tables
+      # Used by #create_new_partitions and generally called once a day to update
+      # the database with new soon-to-be needed child tables.
       #
-      # typically overridden by the concrete class as this is pure business logic
+      # Typically overridden by the concrete class as this is pure business logic.
       #
       def new_partition_key_values_set
         []
       end
 
       #
-      # an array of key values (each key value is an array of keys) that represent
+      # An array of key values (each key value is an array of keys) that represent
       # the child partitions that should be dropped because they are no longer needed.
       #
-      # used by #drop_old_partitions and generally called once a day to clean up
-      # unneeded child tables
+      # Used by #drop_old_partitions and generally called once a day to clean up
+      # unneeded child tables.
       #
-      # typically overridden by the concrete class as this is pure business logic
+      # Typically overridden by the concrete class as this is pure business logic.
       #
       def old_partition_key_values_set
         []
       end
 
       #
-      # remove a specific partition from the database given
-      # the key value(s) of its check constraint columns
+      # Remove a specific partition from the database given
+      # the key value(s) of its check constraint columns.
       #
       def drop_old_partition(*partition_key_values)
         drop_partition_table(*partition_key_values)
       end
 
       #
-      # create a specific child table that does not currently
+      # Create a specific child table that does not currently
       # exist and whose schema (the schema that the table exists in)
       # also already exists (#create_infrastructure is designed to
       # create this).

@@ -1,6 +1,6 @@
 module Partitioned
   #
-  # partition tables by created_at grouping them by week, with
+  # Partition tables by created_at grouping them by week, with
   # a week defined as seven days starting on Monday.
   #
   class ByCreatedAt < ByWeeklyTimeField

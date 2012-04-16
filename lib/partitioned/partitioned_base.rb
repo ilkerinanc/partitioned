@@ -3,7 +3,7 @@
 #
 module Partitioned
   #
-  # used by PartitionedBase class methods that must be overidden.
+  # Used by PartitionedBase class methods that must be overridden.
   #
   class MethodNotImplemented < StandardError
     def initialize(model, method_name, is_class_method = true)
@@ -16,11 +16,11 @@ module Partitioned
   # an ActiveRecord::Base class that can be partitioned.
   #
   # Uses a domain specific language to configure, see Partitioned::PartitionedBase::Configurator
-  # for more information
+  # for more information.
   #
-  # Extends Partitioned::BulkMethodsMixin to provide create_many and update_many
+  # Extends Partitioned::BulkMethodsMixin to provide create_many and update_many.
   #
-  # Uses PartitionManager to manage creation of child tables
+  # Uses PartitionManager to manage creation of child tables.
   #
   # Monkey patches some ActiveRecord routines to call back to this class when INSERT and UPDATE
   # statements are built (to determine the table_name with respect to values being inserted or updated)
@@ -32,7 +32,7 @@ module Partitioned
     self.abstract_class = true
 
     #
-    # returns an array of attribute names (strings) used to fetch the key value(s)
+    # Returns an array of attribute names (strings) used to fetch the key value(s)
     # the determine this specific partition table.
     #
     def self.partition_keys
@@ -40,7 +40,7 @@ module Partitioned
     end
 
     #
-    # the specific values for a partition of this active record's type which are defined by
+    # The specific values for a partition of this active record's type which are defined by
     # #partition_keys
     #
     def self.partition_key_values(values)
@@ -49,7 +49,7 @@ module Partitioned
     end
 
     #
-    # the name of the current partition table determined by this active records attributes that
+    # The name of the current partition table determined by this active records attributes that
     # define the key value(s) for the constraint check.
     #
     def partition_table_name
@@ -58,8 +58,8 @@ module Partitioned
     end
 
     #
-    # normalize the value to be used for partitioning.  This allows, for instance, a class that partitions on
-    # a time field to group the times by month.  An integer field might be grouped by every 10mil values, A
+    # Normalize the value to be used for partitioning. This allows, for instance, a class that partitions on
+    # a time field to group the times by month. An integer field might be grouped by every 10mil values, A
     # string field might be grouped by its first character.
     #
     def self.partition_normalize_key_value(value)
@@ -67,7 +67,7 @@ module Partitioned
     end
 
     #
-    # range generation provided for methods like created_infrastructure that need a set of partition key values
+    # Range generation provided for methods like created_infrastructure that need a set of partition key values
     # to operate on.
     #
     def self.partition_generate_range(start_value, end_value, step = 1)
@@ -75,7 +75,7 @@ module Partitioned
     end
 
     #
-    # return an instance of this partition table's table manager.
+    # Return an instance of this partition table's table manager.
     #
     def self.partition_manager
       @partition_manager = self::PartitionManager.new(self) unless @partition_manager.present?
@@ -83,7 +83,7 @@ module Partitioned
     end
 
     #
-    # return an instance of this partition table's sql_adapter (used by the partition manage to
+    # Return an instance of this partition table's sql_adapter (used by the partition manage to
     # create SQL statements)
     #
     def self.sql_adapter
@@ -92,7 +92,7 @@ module Partitioned
     end
 
     #
-    # in activerecord 3.0 we need to supply an Arel::Table for the key value(s) used
+    # In activerecord 3.0 we need to supply an Arel::Table for the key value(s) used
     # to determine the specific child table to access.
     #
     def self.dynamic_arel_table(values, as = nil)
@@ -106,7 +106,7 @@ module Partitioned
     end
 
     #
-    # used by our active record hacks to supply an Arel::Table given this active record's
+    # Used by our active record hacks to supply an Arel::Table given this active record's
     # current attributes.
     #
     def dynamic_arel_table(as = nil)
@@ -125,7 +125,7 @@ module Partitioned
     }
 
     #
-    # real scope (uses #from_partition_scope).  This scope is used to target the
+    # Real scope (uses #from_partition_scope).  This scope is used to target the
     # active record find() to a specific child table and alias it to the name of the
     # parent table (so activerecord can generally work with it)
     #
@@ -153,7 +153,7 @@ module Partitioned
     }
 
     #
-    # real scope (uses #from_partitioned_without_alias_scope). This scope is used to target the
+    # Real scope (uses #from_partitioned_without_alias_scope). This scope is used to target the
     # active record find() to a specific child table. Is probably best used in advanced
     # activerecord queries when a number of tables are involved in the query.
     #
@@ -181,7 +181,7 @@ module Partitioned
     end
 
     #
-    # return a object used to read configurator information
+    # Return a object used to read configurator information.
     #
     def self.configurator
       unless @configurator
@@ -191,7 +191,7 @@ module Partitioned
     end
 
     #
-    # yields an object used to configure the ActiveRecord class for partitioning
+    # Yields an object used to configure the ActiveRecord class for partitioning
     # using the Configurator Domain Specific Language.
     # 
     # usage:
@@ -207,7 +207,7 @@ module Partitioned
     end
 
     #
-    # returns the configurator DSL object
+    # Returns the configurator DSL object.
     #
     def self.configurator_dsl
       return @configurator_dsl
@@ -215,28 +215,29 @@ module Partitioned
 
     partitioned do |partition|
       #
-      # the schema name to place all child tables.
+      # The schema name to place all child tables.
       #
-      # by default this will be the table name of the parent class with a suffix "_partitions".
-      # for a parent table name foos, that would be foos_partitions
+      # By default this will be the table name of the parent class with a suffix "_partitions".
+      #
+      # For a parent table name foos, that would be foos_partitions
       #
       partition.schema_name lambda {|model|
         return model.table_name + '_partitions'
       }
 
       #
-      # the table name of the table who is the direct ancestor of a child table.
+      # The table name of the table who is the direct ancestor of a child table.
       # The child table is defined by the partition key values passed in.
       #
       # By default this is just the active record's notion of the name of the class.
-      # Multi Level partitiong requires more work.
+      # Multi Level partitioning requires more work.
       #
       partition.parent_table_name lambda {|model, *partition_key_values|
         return model.table_name
       }
 
       #
-      # the schema name of the table who is the direct ancestor of a child table.
+      # The schema name of the table who is the direct ancestor of a child table.
       # The child table is defined by the partition key values passed in.
       #
       partition.parent_table_schema_name lambda {|model, *partition_key_values|
@@ -245,15 +246,15 @@ module Partitioned
       }
 
       #
-      # the prefix for a child table's name.  This is typically a letter ('p') so that
+      # The prefix for a child table's name. This is typically a letter ('p') so that
       # the base_name of the table can be a number generated programtically from
       # the partition key values.
       #
-      # for instance, a child table of the table 'foos' may be partitioned on
+      # For instance, a child table of the table 'foos' may be partitioned on
       # the column company_id whose value is 42.  specific child table would be named
       # 'foos_partitions.p42'
       #
-      # the 'p' is the name_prefix because 'foos_partitions.42' is not a valid table name
+      # The 'p' is the name_prefix because 'foos_partitions.42' is not a valid table name
       # (without quoting).
       #
       partition.name_prefix lambda {|model, *partition_key_values|
@@ -261,7 +262,7 @@ module Partitioned
       }
 
       #
-      # the child tables name without the schema name
+      # The child tables name without the schema name.
       #
       partition.part_name lambda {|model, *partition_key_values|
         configurator = model.configurator
@@ -269,7 +270,7 @@ module Partitioned
       }
 
       #
-      # the full name of a child table defined by the partition key values
+      # The full name of a child table defined by the partition key values.
       #
       partition.table_name lambda {|model, *partition_key_values|
         configurator = model.configurator
@@ -277,10 +278,10 @@ module Partitioned
       }
 
       #
-      # the name of the child table without a schema name or prefix. this is used to
+      # The name of the child table without a schema name or prefix. this is used to
       # build child table names for multi-level partitions.
       #
-      # for a table named foos_partitions.p42, this would be "42"
+      # For a table named foos_partitions.p42, this would be "42"
       #
       partition.base_name lambda { |model, *partition_key_values|
         return model.partition_normalize_key_value(*partition_key_values).to_s

@@ -1,7 +1,7 @@
 module Partitioned
   #
-  # table partitioning by id.  this partitioning breaks up data by
-  # the value of its primary key.  a specific record's child table
+  # Table partitioning by id. this partitioning breaks up data by
+  # the value of its primary key. A specific record's child table
   # is determined by the number resulting from the integer math:
   #   ID / ById::partition_table_size * ById::partition_table_size
   # 
@@ -9,7 +9,7 @@ module Partitioned
     self.abstract_class = true
 
     #
-    # specific to this partitioning, we need to prefetch the primary key (id)
+    # Specific to this partitioning, we need to prefetch the primary key (id)
     # before we attempt to do the insert because the insert wants to know the
     # name of the specific child table to access.
     #
@@ -18,7 +18,7 @@ module Partitioned
     end
 
     #
-    # the number of records in each child table.
+    # The number of records in each child table.
     #
     def self.partition_table_size
       return 10000000

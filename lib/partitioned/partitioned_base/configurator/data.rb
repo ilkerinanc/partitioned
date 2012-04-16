@@ -2,7 +2,7 @@ module Partitioned
   class PartitionedBase
     module Configurator
       #
-      # the state configured by the Dsl and read by Reader
+      # The state configured by the Dsl and read by Reader.
       #
       class Data
         class Index

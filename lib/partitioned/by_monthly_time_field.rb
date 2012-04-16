@@ -1,6 +1,6 @@
 module Partitioned
   #
-  # partition tables by a time field grouping them by week, with
+  # Partition tables by a time field grouping them by week, with
   # a week defined as seven days starting on Monday.
   #
   class ByMonthlyTimeField < ByTimeField

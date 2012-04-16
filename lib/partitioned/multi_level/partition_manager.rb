@@ -2,7 +2,7 @@ module Partitioned
   class MultiLevel
     class PartitionManager < Partitioned::PartitionedBase::PartitionManager
       #
-      # the once called function to prepare a parent table for partitioning as well
+      # The once called function to prepare a parent table for partitioning as well
       # as create the schema that the child tables will be placed in.
       #
       def create_infrastructure(enumerable = [[]])
@@ -15,7 +15,7 @@ module Partitioned
       protected
 
       #
-      # create a specific child table that does not currently
+      # Create a specific child table that does not currently
       # exist and whose schema (the schema that the table exists in)
       # also already exists (#create_infrastructure is designed to
       # create this).
@@ -31,12 +31,12 @@ module Partitioned
       end
 
       #
-      # is the table a child table without itself having any children.
+      # Is the table a child table without itself having any children.
       # generally leaf tables are where all indexes and foreign key
       # constraints will be placed because that is where the data will be.
       #
       # Non leaf tables will typically have a rule placed on them
-      # (via add_parent_table_rules) that prevents any inserts from occuring
+      # (via add_parent_table_rules) that prevents any inserts from occurring
       # on them.
       #
       def is_leaf_partition?(*partition_key_values)

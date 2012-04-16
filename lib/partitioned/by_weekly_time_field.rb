@@ -1,14 +1,14 @@
 module Partitioned
   #
-  # partition tables by a time field grouping them by week, with
+  # Partition tables by a time field grouping them by week, with
   # a week defined as seven days starting on Monday.
   #
   class ByWeeklyTimeField < ByTimeField
     self.abstract_class = true
 
     #
-    # normalize a partition key value by week.  We've picked
-    # the begining of the week to key on, which is Monday.
+    # Normalize a partition key value by week. We've picked
+    # the beginning of the week to key on, which is Monday.
     #
     def self.partition_normalize_key_value(time_value)
       return time_value.at_beginning_of_week

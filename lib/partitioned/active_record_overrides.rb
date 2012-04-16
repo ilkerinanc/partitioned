@@ -1,7 +1,7 @@
 #
-# these are things our base class must fix in ActiveRecord::Base
+# These are things our base class must fix in ActiveRecord::Base
 #
-# no need to monkey patch these, just override them.
+# No need to monkey patch these, just override them.
 #
 module Partitioned
   module ActiveRecordOverrides
@@ -9,10 +9,10 @@ module Partitioned
     # arel_attribute_values needs to return attributes (and their values) associated with the dynamic_arel_table instead of the
     # static arel_table provided by ActiveRecord.
     #
-    # the standard release of this function gathers a collection of attributes and creates a wrapper function around them
+    # The standard release of this function gathers a collection of attributes and creates a wrapper function around them
     # that names the table they are associated with. that naming is incorrect for partitioned tables.
     #
-    # we call the standard release's method then retrofit our partitioned table into the hash that is returned.
+    # We call the standard releases method then retrofit our partitioned table into the hash that is returned.
     #
     def arel_attributes_values(include_primary_key = true, include_readonly_attributes = true, attribute_names = @attributes.keys)
       attrs = super
@@ -21,7 +21,7 @@ module Partitioned
     end
 
     #
-    # delete just needs a wrapper around it to specify the specific partition.
+    # Delete just needs a wrapper around it to specify the specific partition.
     #
     def delete
       if persisted?
