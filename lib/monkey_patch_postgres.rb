@@ -2,8 +2,17 @@ require 'active_record'
 require 'active_record/base'
 require 'active_record/connection_adapters/abstract_adapter'
 
+#
+# Patching {ActiveRecord::ConnectionAdapters::TableDefinition} and
+# {ActiveRecord::ConnectionAdapters::PostgreSQLAdapter} to add functionality
+# needed to abstract partition specific SQL statements.
+#
 module ActiveRecord::ConnectionAdapters
   class TableDefinition
+    #
+    # Builds a SQL check constraint
+    #
+    # @param [String] constraint a SQL constraint
     def check_constraint(constraint)
       @columns << Struct.new(:to_sql).new("CHECK (#{constraint})")
     end
@@ -15,14 +24,18 @@ module ActiveRecord::ConnectionAdapters
     # partitioning like by_id because the ID is required before the insert
     # so that the specific child table is known ahead of time.
     #
+    # @param [String] sequence_name the name of the sequence to fetch the next value from
+    # @returns [Integer] the value from the sequence
     def next_sequence_value(sequence_name)
       return execute("select nextval('#{sequence_name}')").field_values("nextval").first
     end
 
     #
     # Get the some next values in a sequence.
-    # batch_size - count of values.
     #
+    # @param [String] sequence_name the name of the sequence to fetch the next values from
+    # @param [Integer] batch_size count of values.
+    # @returns [Array<Integer>] an array of values from the sequence
     def next_sequence_values(sequence_name, batch_size)
       result = execute("select nextval('#{sequence_name}') from generate_series(1, #{batch_size})")
       return result.field_values("nextval").map(&:to_i)
@@ -34,6 +47,8 @@ module ActiveRecord::ConnectionAdapters
     # here to determine if it should happen, so Relation::insert has been modified to request of
     # the ActiveRecord::Base derived class if it requires a prefetch.
     #
+    # @param [String] table_name the table name to query
+    # returns [Boolean] returns true if the table should have its primary key prefetched.
     def prefetch_primary_key?(table_name)
       return false
     end

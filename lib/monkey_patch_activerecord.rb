@@ -5,7 +5,7 @@ require 'active_record/relation.rb'
 require 'active_record/persistence.rb'
 
 #
-# Patching activerecord to allow specifying the table name as a function of
+# Patching {ActiveRecord} to allow specifying the table name as a function of
 # attributes.
 #
 module ActiveRecord
@@ -27,12 +27,12 @@ module ActiveRecord
     end
   end
   #
-  # Patches for relation to allow back hooks into the activerecord
+  # Patches for relation to allow back hooks into the {ActiveRecord}
   # requesting name of table as a function of attributes.
   #
   class Relation
     #
-    # Patches activerecord's building of an insert statement to request
+    # Patches {ActiveRecord}'s building of an insert statement to request
     # of the model a table name with respect to attribute values being
     # inserted.
     #
