@@ -14,6 +14,10 @@ module Partitioned
     #
     # We call the standard releases method then retrofit our partitioned table into the hash that is returned.
     #
+    # @param [Boolean] include_primary_key (true)
+    # @param [Boolean] include_readonly_attributes (true)
+    # @param [Boolean] attribute_names (@attributes.keys)
+    # @return [Hash] hash of key value pairs associated with persistent attributes
     def arel_attributes_values(include_primary_key = true, include_readonly_attributes = true, attribute_names = @attributes.keys)
       attrs = super
       actual_arel_table = dynamic_arel_table(self.class.table_name)
@@ -23,6 +27,7 @@ module Partitioned
     #
     # Delete just needs a wrapper around it to specify the specific partition.
     #
+    # @return [optional] undefined
     def delete
       if persisted?
         self.class.from_partition(*self.class.partition_key_values(attributes)).delete(id)

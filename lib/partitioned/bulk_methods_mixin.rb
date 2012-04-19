@@ -1,4 +1,8 @@
 module Partitioned
+  #
+  # MixIn used to extend ActiveRecord::Base classes implementing bulk insert and update operations
+  # through {#create_many} and {#update_many}
+  #
   module BulkMethodsMixin
     class BulkUploadDataInconsistent < StandardError
       def initialize(model, table_name, expected_columns, found_columns, while_doing)
@@ -17,49 +21,37 @@ module Partitioned
     #   :returning = nil
     #   :check_consistency = true
     #
-    # examples:
-    #  first example did not uses more options.
+    # @example no options used
+    #   rows = [
+    #         { :name => 'Keith', :salary => 1000 },
+    #         { :name => 'Alex', :salary => 2000 }
+    #   ]
+    #   Employee.create_many(rows)
     #
-    # rows = [
-    #         { :name => 'Keith',
-    #           :salary => 1000 },
-    #         { :name => 'Alex',
-    #           :salary => 2000 }
-    #        ]
+    # @example with :returning option to returns key value
+    #   rows = [
+    #         { :name => 'Keith', :salary => 1000 },
+    #         { :name => 'Alex', :salary => 2000 }
+    #   ]
+    #   options = { :returning => [:id] }
+    #   Employee.create_many(rows, options)
+    #   [#<Employee id: 1>, #<Employee id: 2>]
     #
-    # Employee.create_many(rows)
+    # @example with :slice_size option (will generate two insert queries)
+    #   rows = [
+    #         { :name => 'Keith', :salary => 1000 },
+    #         { :name => 'Alex', :salary => 2000 },
+    #         { :name => 'Mark', :salary => 3000 }
+    #   ]
+    #   options = { :slice_size => 2 }
+    #   Employee.create_many(rows, options)
     #
-    #  this second example uses :returning option
-    #  to returns key values
-    #
-    # rows = [
-    #         { :name => 'Keith',
-    #           :salary => 1000 },
-    #         { :name => 'Alex',
-    #           :salary => 2000 }
-    #        ]
-    #
-    # options = { :returning => [:id] }
-    #
-    # Employee.create_many(rows, options) returns [#<Employee id: 1>, #<Employee id: 2>]
-    #
-    #  third example uses :slice_size option.
-    #  Slice_size - is an integer that specifies how many
-    #  records will be created in a single SQL query.
-    #
-    # rows = [
-    #         { :name => 'Keith',
-    #           :salary => 1000 },
-    #         { :name => 'Alex',
-    #           :salary => 2000 },
-    #         { :name => 'Mark',
-    #           :salary => 3000 }
-    #        ]
-    #
-    # options = { :slice_size => 2 }
-    #
-    # Employee.create_many(rows, options) will generate two insert queries
-    #
+    # @param [Array<Hash>] rows ([]) data to be inserted into database
+    # @param [Hash] options ({}) options for bulk inserts
+    # @option options [Integer] :slice_size (1000) how many records will be created in a single SQL query
+    # @option options [Boolean] :check_consitency (true) ensure some modicum of sanity on the incoming dataset, specifically: does each row define the same set of key/value pairs
+    # @option options [Array or String] :returning list of fields to return.
+    # @return [Array<Hash>] rows returned from DB as option[:returning] requests
     def create_many(rows, options = {})
       return [] if rows.blank?
       options[:slice_size] = 1000 unless options.has_key?(:slice_size)
