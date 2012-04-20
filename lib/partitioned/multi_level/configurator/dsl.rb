@@ -1,5 +1,11 @@
 module Partitioned
   class MultiLevel
+    #
+    # Configuration manager for multi-level partitioning
+    # it supports, the front-end UI (a Domain Specific Language) using {Dsl}
+    # state using {Data}
+    # and a parser using {Reader}
+    #
     module Configurator
       # The Domain Specific Language UI manager for multi level partitioning classes 
       class Dsl < Partitioned::PartitionedBase::Configurator::Dsl

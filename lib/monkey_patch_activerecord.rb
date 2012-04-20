@@ -9,7 +9,13 @@ require 'active_record/persistence.rb'
 # attributes.
 #
 module ActiveRecord
+  #
+  # Patches for Persistence to allow certain partitioning (that related to the primary key) to work.
+  #
   module Persistence
+    #
+    # patch the create method to prefetch the primary key if needed
+    #
     def create
       if self.id.nil? && self.class.respond_to?(:prefetch_primary_key?) && self.class.prefetch_primary_key?
         self.id = connection.next_sequence_value(self.class.sequence_name)

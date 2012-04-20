@@ -8,6 +8,9 @@ require 'active_record/connection_adapters/abstract_adapter'
 # needed to abstract partition specific SQL statements.
 #
 module ActiveRecord::ConnectionAdapters
+  #
+  # Patches associated with building check constraints.
+  #
   class TableDefinition
     #
     # Builds a SQL check constraint
@@ -18,6 +21,12 @@ module ActiveRecord::ConnectionAdapters
     end
   end
 
+  #
+  # Patches extending the postgres adapter with new operations for managing
+  # sequences (and sets of sequence values), schemas and foreign keys.
+  # These should go into AbstractAdapter allowing any database adapter
+  # to take advantage of these SQL builders.
+  #
   class PostgreSQLAdapter < AbstractAdapter
     #
     # Get the next value in a sequence. Used on INSERT operation for
