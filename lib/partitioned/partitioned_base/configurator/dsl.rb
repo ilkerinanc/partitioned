@@ -38,9 +38,9 @@ module Partitioned
       #   partitioned do |partition|
       #     partition.on lambda{ |model| return model.partition_time_field}
       #     partition.constraint lambda{|model,time_field_value|
-      #                                 return "#{model.partition_time_field} >= '#{time_field_value.strftime}'
-      #                                 and #{model.partition_time_field} < '#{(time_field_value + 1.day).strftime}'"
-      #                                }
+      #       return "#{model.partition_time_field} >= '#{time_field_value.strftime}' and
+      #         #{model.partition_time_field} < '#{(time_field_value + 1.day).strftime}'"
+      #     }
       #   end
       # end
       #

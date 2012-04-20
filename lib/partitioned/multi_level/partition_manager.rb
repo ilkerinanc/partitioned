@@ -1,10 +1,15 @@
 module Partitioned
   class MultiLevel
+    #
+    # the manger of partitioned requests for models partitioned multiple times
+    #
     class PartitionManager < Partitioned::PartitionedBase::PartitionManager
       #
       # The once called function to prepare a parent table for partitioning as well
       # as create the schema that the child tables will be placed in.
       #
+      # @param [Enumerable] enumerable (Array<Array>) the key values that should be used to create the parent partition tables.
+      # @return [optional]
       def create_infrastructure(enumerable = [[]])
         super()
         enumerable.each do |*partition_key_values|
@@ -20,6 +25,8 @@ module Partitioned
       # also already exists (#create_infrastructure is designed to
       # create this).
       #
+      # @param [*Array<Object>] partition_key_values all key values needed to create a partition
+      # @return [optional]
       def create_new_partition(*partition_key_values)
         create_partition_table(*partition_key_values)
         if is_leaf_partition?(*partition_key_values)
@@ -39,6 +46,8 @@ module Partitioned
       # (via add_parent_table_rules) that prevents any inserts from occurring
       # on them.
       #
+      # @param [*Array<Object>] partition_key_values all key values specifying a given child table
+      # @return [Boolean] true if this partition should contain records
       def is_leaf_partition?(*partition_key_values)
         return partition_key_values.length == parent_table_class.configurator.on_fields.length
       end

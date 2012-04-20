@@ -1,8 +1,13 @@
 module Partitioned
   class MultiLevel
     module Configurator
+      # coalesces and parses all {Data} objects allowing the
+      # {PartitionManager} to request partitioning information froma
+      # centralized source from multi level partitioned models
       class Reader < Partitioned::PartitionedBase::Configurator::Reader
+        # configurator for a specific class level
         UsingConfigurator = Struct.new(:model, :sliced_class, :dsl)
+
         def initialize(most_derived_activerecord_class)
           super
           @using_classes = nil
@@ -12,6 +17,7 @@ module Partitioned
         #
         # The field used to partition child tables.
         #
+        # @return [Array<Symbol>] fields used to partition this model
         def on_fields
           unless @on_fields
             @on_fields = using_collect(&:on_field).map(&:to_sym)

@@ -1,6 +1,9 @@
 module Partitioned
   class PartitionedBase
     module Configurator
+      # coalesces and parses all {Data} objects allowing the
+      # {PartitionManager} to request partitioning information froma
+      # centralized source.
       class Reader
         attr_reader :model
 

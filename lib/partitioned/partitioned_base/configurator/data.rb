@@ -5,6 +5,7 @@ module Partitioned
       # The state configured by the Dsl and read by Reader.
       #
       class Data
+        # represents a SQL index
         class Index
           attr_accessor :field, :options
           def initialize(field, options = {})
@@ -12,6 +13,7 @@ module Partitioned
             @options = options
           end
         end
+        # represents a SQL foreign key reference
         class ForeignKey
           attr_accessor :referencing_field, :referenced_table, :referenced_field
           def initialize(referencing_field, referenced_table = nil, referenced_field = :id)

@@ -1,7 +1,9 @@
 module Partitioned
   class MultiLevel
     module Configurator
+      # The Domain Specific Language UI manager for multi level partitioning classes 
       class Dsl < Partitioned::PartitionedBase::Configurator::Dsl
+        # used to prevent use of invalid directives
         class InvalidForMultiLevelPartitioning < StandardError
           def initialize(model, dsl_key, remedy)
             super("#{model.name}: '#{dsl_key}' is not valid for multi-level partitioning.  #{remedy}")
@@ -18,10 +20,13 @@ module Partitioned
         #
         # Definition of classes which will be used at multi level partitioning.
         #
+        # @param [*Array<Class>] classes the classes, in order, used to partition this model
+        # @return [optional]
         def using_classes(*classes)
           data.using_classes += [*classes]
         end
 
+        # @raise [InvalidForMultiLevelPartitioning] always raised. `on` is not a valid DSL directive for multi-level partitioning
         def on(*ignored)
           raise InvalidForMultiLevelPartitioning.new(model, :on, "the partitioned keyword 'using' is used to define multi-level partitioned tables.")
         end
