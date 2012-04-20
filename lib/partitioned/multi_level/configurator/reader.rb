@@ -78,10 +78,22 @@ module Partitioned
           return parts.join('_')
         end
 
+        # retrieve a specific configurator from an ordered list.  for multi-level partitioning
+        # we need to find the specific configurator for the partitioning level we are interested
+        # in managing.
+        #
+        # @param [Integer] index the partitioning level to query
+        # @return [Configurator] the configurator for the specific level queried
         def using_configurator(index)
           return using_class(index).configurator
         end
 
+        # retrieve a specific partitioning class from an ordered list.  for multi-level partitioning
+        # we need to find the specific {Partitioned::PartitionedBase} class for the partitioning level we are interested
+        # in managing.
+        #
+        # @param [Integer] index the partitioning level to query
+        # @return [{Partitioned::PartitionedBase}] the class for the specific level queried
         def using_class(index)
           return using_classes[index]
         end

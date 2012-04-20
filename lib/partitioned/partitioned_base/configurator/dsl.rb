@@ -4,22 +4,22 @@ module Partitioned
       #
       # The Domain Specific Language manager for configuring partitioning.
       #
-      # example:
+      # @example of use:
       #
-      # class Employee < Partitioned::ByCreatedAt
-      #   partitioned do |partition|
-      #     partition.index :id, :unique => true
-      #     partition.foreign_key :company_id
-      #   end
-      # end
-      #
-      # in the above example, block:
-      #
-      #   partitioned do |partition|
-      #      ...
+      #   class Employee < Partitioned::ByCreatedAt
+      #     partitioned do |partition|
+      #       partition.index :id, :unique => true
+      #       partition.foreign_key :company_id
+      #     end
       #   end
       #
-      # Scopes a set of "partition directives".  The directives are accessed via the block parameter 'partition'
+      #   in the above example, block:
+      #
+      #     partitioned do |partition|
+      #        ...
+      #     end
+      #
+      #   Scopes a set of "partition directives".  The directives are accessed via the block parameter 'partition'
       #
       # Directives parameters have two forms, a canonical form which takes a set of parameters
       # and a dynamic form which takes a single parameter which is either a string that should be interpolated or
@@ -135,6 +135,9 @@ module Partitioned
       # resolve to FavoriteEmployee.index_field and be :baz as expected.
       #
       class Dsl
+        #
+        # raised when a partitioned DSL directive's parameters are considered invalid
+        #
         class InvalidConfiguratorDirectiveValue < StandardError
           def initialize(model, table_name, directive, value, explanation)
             super("#{model.name} [#{table_name}] invalid value '#{value}' for partitioned directive '#{directive}'.  #{explanation}")

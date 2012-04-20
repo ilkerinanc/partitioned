@@ -26,6 +26,13 @@ module Partitioned
             @referenced_field = referenced_field
           end
 
+          #
+          # Produce a table name from the name of the foreign key.  in rails, this really
+          # means "foo_id" should be mapped to "foos", and "company_id" should be mapped to
+          # "companies"
+          #
+          # @param [String] foreign_key_field the name of the foreign key field
+          # @return [String] the name of the table associated with the foreign key
           def self.foreign_key_to_foreign_table_name(foreign_key_field)
             return ActiveSupport::Inflector::pluralize(foreign_key_field.to_s.sub(/_id$/,''))
           end
