@@ -13,6 +13,7 @@ module Partitioned
     # before we attempt to do the insert because the insert wants to know the
     # name of the specific child table to access.
     #
+    # @return [Boolean] true
     def self.prefetch_primary_key?
       return true
     end
@@ -20,10 +21,15 @@ module Partitioned
     #
     # The number of records in each child table.
     #
+    # @return [Integer] the number of rows in a partition
     def self.partition_table_size
       return 10000000
     end
 
+    #
+    # The name of the field to partition on
+    #
+    # @return [String] the name of the field to partition on
     def self.partition_integer_field
       return :id
     end

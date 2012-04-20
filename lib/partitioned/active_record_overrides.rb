@@ -4,6 +4,9 @@
 # No need to monkey patch these, just override them.
 #
 module Partitioned
+  #
+  # methods that need to be override in an ActiveRecord::Base derived class so that we can support partitioning
+  #
   module ActiveRecordOverrides
     #
     # arel_attribute_values needs to return attributes (and their values) associated with the dynamic_arel_table instead of the

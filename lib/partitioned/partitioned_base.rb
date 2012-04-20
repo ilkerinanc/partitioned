@@ -35,14 +35,19 @@ module Partitioned
     # Returns an array of attribute names (strings) used to fetch the key value(s)
     # the determine this specific partition table.
     #
+    # @return [String] the column name used to partition this table
+    # @return [Array<String>] the column names used to partition this table
     def self.partition_keys
       return configurator.on_fields
     end
 
     #
     # The specific values for a partition of this active record's type which are defined by
-    # #partition_keys
+    # {#self.partition_keys}
     #
+    # @param [Hash] values key/value pairs to extract values from
+    # @return [Object] value of partition key
+    # @return [Array<Object>] values of partition keys
     def self.partition_key_values(values)
       symbolized_values = values.symbolize_keys
       return self.partition_keys.map{|key| symbolized_values[key.to_sym]}
@@ -52,6 +57,7 @@ module Partitioned
     # The name of the current partition table determined by this active records attributes that
     # define the key value(s) for the constraint check.
     #
+    # @return [String] the fully qualified name of the database table, ie: foos_partitions.p17
     def partition_table_name
       symbolized_attributes = attributes.symbolize_keys
       return self.class.partition_name(*self.class.partition_keys.map{|attribute_name| symbolized_attributes[attribute_name]})
@@ -62,6 +68,8 @@ module Partitioned
     # a time field to group the times by month. An integer field might be grouped by every 10mil values, A
     # string field might be grouped by its first character.
     #
+    # @param [Object] value the partition key value
+    # @return [Object] the normalized value for the key value passed in
     def self.partition_normalize_key_value(value)
       return value
     end
@@ -70,6 +78,10 @@ module Partitioned
     # Range generation provided for methods like created_infrastructure that need a set of partition key values
     # to operate on.
     #
+    # @param [Object] start_value the first value to generate the range from
+    # @param [Object] end_value the last value to generate the range from
+    # @param [Object] step (1) number of values to advance.
+    # @return [Enumerable] the range generated
     def self.partition_generate_range(start_value, end_value, step = 1)
       return Range.new(start_value, end_value).step(step)
     end
@@ -77,6 +89,7 @@ module Partitioned
     #
     # Return an instance of this partition table's table manager.
     #
+    # @return [{PartitionManager}] the partition manager for this partitioned model
     def self.partition_manager
       @partition_manager = self::PartitionManager.new(self) unless @partition_manager.present?
       return @partition_manager
@@ -86,6 +99,7 @@ module Partitioned
     # Return an instance of this partition table's sql_adapter (used by the partition manage to
     # create SQL statements)
     #
+    # @return [{SqlAdapter}] the object used to create sql statements for this partitioned model
     def self.sql_adapter
       @sql_adapter = self::SqlAdapter.new(self) unless @sql_adapter.present?
       return @sql_adapter
@@ -95,6 +109,9 @@ module Partitioned
     # In activerecord 3.0 we need to supply an Arel::Table for the key value(s) used
     # to determine the specific child table to access.
     #
+    # @param [Hash] values key/value pairs for all attributes
+    # @param [String] as (nil) the name of the table associated with this Arel::Table
+    # @return [Arel::Table] the generated Arel::Table
     def self.dynamic_arel_table(values, as = nil)
       @arel_tables ||= {}
       key_values = self.partition_key_values(values)
@@ -109,6 +126,8 @@ module Partitioned
     # Used by our active record hacks to supply an Arel::Table given this active record's
     # current attributes.
     #
+    # @param [String] as (nil) the name of the table associated with the Arel::Table
+    # @return [Arel::Table] the generated Arel::Table
     def dynamic_arel_table(as = nil)
       symbolized_attributes = attributes.symbolize_keys
       key_values = Hash[*self.class.partition_keys.map{|name| [name,symbolized_attributes[name]]}.flatten]
@@ -118,6 +137,8 @@ module Partitioned
     # :from_partition_scope is generally not used directly,
     # use helper self.from_partition so that the derived class
     # can be passed into :from_partition_scope
+    #
+    # @return [Hash] the from scoping
     scope :from_partition_scope, lambda { |target_class, *partition_field|
       {
         :from => "#{target_class.partition_name(*partition_field)} AS #{target_class.table_name}"
@@ -139,6 +160,8 @@ module Partitioned
     # class methods is not inherited, one  must use this form (#from_partition) instead
     # of #from_partition_scope to get the most derived classes specific active record scope.
     #
+    # @param [*Array<Object>] partition_field the field values to partition on
+    # @return [Hash] the scoping
     def self.from_partition(*partition_field)
       from_partition_scope(self, *partition_field)
     end
@@ -146,6 +169,8 @@ module Partitioned
     # :from_partitioned_without_alias_scope is generally not used directly,
     # use helper self.from_partitioned_without_alias so that the derived class
     # can be passed into :from_partitioned_without_alias_scope
+    #
+    # @return [Hash] the from scoping
     scope :from_partitioned_without_alias_scope, lambda { |target_class, *partition_field|
       {
         :from => target_class.partition_name(*partition_field)
@@ -176,6 +201,8 @@ module Partitioned
     # class methods is not inherited, one  must use this form (#from_partitioned_without_alias) instead
     # of #from_partitioned_without_alias_scope to get the most derived classes specific active record scope.
     #
+    # @param [*Array<Object>] partition_field the field values to partition on
+    # @return [Hash] the scoping
     def self.from_partitioned_without_alias(*partition_field)
       from_partitioned_without_alias_scope(self, *partition_field)
     end
@@ -183,6 +210,7 @@ module Partitioned
     #
     # Return a object used to read configurator information.
     #
+    # @return [{Configurator::Reader}] the configuration reader for this partitioned model
     def self.configurator
       unless @configurator
         @configurator = self::Configurator::Reader.new(self)
@@ -201,6 +229,7 @@ module Partitioned
     #     partition.foreign_key :company_id
     #   end
     #
+    # @return [{Configurator::Dsl}] the Domain Specifical Language UI manager
     def self.partitioned
       @configurator_dsl ||= self::Configurator::Dsl.new(self)
       yield @configurator_dsl
@@ -209,6 +238,7 @@ module Partitioned
     #
     # Returns the configurator DSL object.
     #
+    # @return [{Configurator::Dsl}] the Domain Specifical Language UI manager
     def self.configurator_dsl
       return @configurator_dsl
     end

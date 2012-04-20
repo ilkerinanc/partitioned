@@ -11,6 +11,10 @@ module Partitioned
     #
     # This can be used to calls that take an enumerable like create_infrastructure.
     #
+    # @param [Date] start_date the first date to generate the range from
+    # @param [Date] end_date the last date to generate the range from
+    # @param [Object] step (:default) number of values to advance (:default means use {#self.partition_table_size}).
+    # @return [Enumerable] the range generated
     def self.partition_generate_range(start_date, end_date, step = :default)
       step = partition_table_size if step == :default
       current_date = partition_normalize_key_value(start_date)
@@ -25,6 +29,8 @@ module Partitioned
     #
     # Normalize the value to the current day.
     #
+    # @param [Time] time_value the partitioned key value
+    # @return [Time] time_value normalized
     def self.partition_normalize_key_value(time_value)
       return time_value.to_date
     end
@@ -32,6 +38,7 @@ module Partitioned
     #
     # The size of the partition, 1.day
     #
+    # @return [Integer] the size of the partition
     def self.partition_table_size
       return 1.day
     end
@@ -40,6 +47,7 @@ module Partitioned
     # Abstract -- implement in a derived class.
     # The name of the time-related field we will use to partition child tables.
     #
+    # @raise MethodNotImplemented
     def self.partition_time_field
       raise MethodNotImplemented.new(self, :partition_time_field)
     end

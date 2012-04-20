@@ -1,25 +1,23 @@
 module Partitioned
   #
   # MixIn used to extend ActiveRecord::Base classes implementing bulk insert and update operations
-  # through {#create_many} and {#update_many}
+  # through {#create_many} and {#update_many}.  {Partitioned::PartitionedBase} classes are extended
+  # with these methods by default.
+  #
+  # @example to use in non-{Partitioned::PartitionedBase} class:
+  #   class Company < ActiveRecord::Base
+  #     extend Partitioned::BulkMethodsMixin
+  #   end
   #
   module BulkMethodsMixin
+    # exception thrown when row data structures are inconsistent between rows in single call to {#create_many} or {#update_many}
     class BulkUploadDataInconsistent < StandardError
       def initialize(model, table_name, expected_columns, found_columns, while_doing)
         super("#{model.name}: for table: #{table_name}; #{expected_columns} != #{found_columns}; #{while_doing}")
       end
     end
-    #
+
     # BULK creation of many rows
-    #
-    # rows: an array of hashtables of data to insert into the database
-    #       each hashtable must have the same number of keys (and same
-    #       names for each key).
-    #
-    # options:
-    #   :slice_size = 1000
-    #   :returning = nil
-    #   :check_consistency = true
     #
     # @example no options used
     #   rows = [
@@ -50,8 +48,9 @@ module Partitioned
     # @param [Hash] options ({}) options for bulk inserts
     # @option options [Integer] :slice_size (1000) how many records will be created in a single SQL query
     # @option options [Boolean] :check_consitency (true) ensure some modicum of sanity on the incoming dataset, specifically: does each row define the same set of key/value pairs
-    # @option options [Array or String] :returning list of fields to return.
+    # @option options [Array or String] :returning (nil) list of fields to return.
     # @return [Array<Hash>] rows returned from DB as option[:returning] requests
+    # @raise [BulkUploadDataInconsistent] raised when key/value pairs between rows are inconsistent (check disabled with option :check_consistency)
     def create_many(rows, options = {})
       return [] if rows.blank?
       options[:slice_size] = 1000 unless options.has_key?(:slice_size)
@@ -107,78 +106,56 @@ module Partitioned
     #
     # BULK updates of many rows
     #
-    # rows: an array of hashtables of data to insert into the database
-    #       each hashtable must have the same number of keys (and same
-    #       names for each key).
+    # @return [Array<Hash>] rows returned from DB as option[:returning] requests
+    # @raise [BulkUploadDataInconsistent] raised when key/value pairs between rows are inconsistent (check disabled with option :check_consistency)
+    # @param [Hash] options ({}) options for bulk inserts
+    # @option options [Integer] :slice_size (1000) how many records will be created in a single SQL query
+    # @option options [Boolean] :check_consitency (true) ensure some modicum of sanity on the incoming dataset, specifically: does each row define the same set of key/value pairs
+    # @option options [Array] :returning (nil) list of fields to return.
+    # @option options [String] :returning (nil) single field to return.
     #
-    # options:
-    #   :slice_size = 1000
-    #   :returning = nil
-    #   :set_array = from first row passed in
-    #   :check_consistency = true
-    #   :where = '"#{table_name}.id = datatable.id"'
+    # @overload update_many(rows = [], options = {})
+    #   @param [Array<Hash>] rows ([]) data to be updated
+    #   @option options [String] :set_array (built from first row passed in) the set clause
+    #   @option options [String] :where ('"#{table_name}.id = datatable.id"') the where clause
     #
-    # examples:
-    #  this first example uses "set_array" to add the value of "salary"
-    #  to the specific employee's salary
-    #  the default where clause is to match IDs so, it works here.
-    # rows = [
-    #         { :id => 1,
-    #           :salary => 1000 },
-    #         { :id => 10,
-    #           :salary => 2000 },
-    #         { :id => 23,
-    #           :salary => 2500 }
-    #        ]
+    # @overload update_many(rows = {}, options = {})
+    #   @param [Hash<Hash, Hash>] rows ({}) data to be updated
+    #   @option options [String] :set_array (built from the values in the first key/value pair of `rows`) the set clause
+    #   @option options [String] :where (built from the keys in the first key/value pair of `rows`) the where clause
     #
-    # options = { :set_array => '"salary = datatable.salary"' }
+    # @example using "set_array" to add the value of "salary" to the specific employee's salary the default where clause matches IDs so, it works here.
+    #   rows = [
+    #     { :id => 1, :salary => 1000 },
+    #     { :id => 10, :salary => 2000 },
+    #     { :id => 23, :salary => 2500 }
+    #   ]
+    #   options = { :set_array => '"salary = datatable.salary"' }
+    #   Employee.update_many(rows, options)
     #
-    # Employee.update_many(rows, options)
-    #
-    #
-    #  this versions sets the where clause to match Salaries.
-    # rows = [
-    #         { :id => 1,
-    #           :salary => 1000,
-    #           :company_id => 10 },
-    #         { :id => 10,
-    #           :salary => 2000,
-    #           :company_id => 12 },
-    #         { :id => 23,
-    #           :salary => 2500,
-    #           :company_id => 5 }
-    #        ]
-    #
-    # options = { :set_array => '"company_id = datatable.company_id"',
-    #             :where => '"#{table_name}.salary = datatable.salary"' }
-    #
-    # Employee.update_many(rows, options)
-    #
-    #
-    #  this version sets the where clause to the KEY of the hash passed in
-    # and the set_array is generated from the VALUES
-    #
-    # rows = {
-    #   { :id => 1 } => {
-    #     :salary => 100000,
-    #     :company_id => 10
-    #   },
-    #   { :id => 10 } => {
-    #     :salary => 110000,
-    #     :company_id => 12
-    #   },
-    #   { :id => 23 } => {
-    #     :salary => 90000,
-    #     :company_id => 5
+    # @example using where clause to match salary.
+    #   rows = [
+    #     { :id => 1, :salary => 1000, :company_id => 10 },
+    #     { :id => 10, :salary => 2000, :company_id => 12 },
+    #     { :id => 23, :salary => 2500, :company_id => 5 }
+    #   ]
+    #   options = {
+    #     :set_array => '"company_id = datatable.company_id"',
+    #     :where => '"#{table_name}.salary = datatable.salary"'
     #   }
-    # }
+    #   Employee.update_many(rows, options)
     #
-    # Employee.update_many(rows)
+    # @example setting where clause to the KEY of the hash passed in and the set_array is generated from the VALUES
+    #   rows = {
+    #     { :id => 1 } => { :salary => 100000, :company_id => 10 },
+    #     { :id => 10 } => { :salary => 110000, :company_id => 12 },
+    #     { :id => 23 } => { :salary => 90000, :company_id => 5 }
+    #   }
+    #   Employee.update_many(rows)
     #
-    # Remember that you should probably set updated_at using "updated = datatable.updated_at"
-    # or "updated_at = now()" in the set_array if you want to follow
-    # the standard active record model for time columns (and you have an updated_at column)
-
+    # @note Remember that you should probably set updated_at using "updated = datatable.updated_at"
+    #   or "updated_at = now()" in the set_array if you want to follow
+    #   the standard active record model for time columns (and you have an updated_at column)
     def update_many(rows, options = {})
       return [] if rows.blank?
       if rows.is_a?(Hash)
